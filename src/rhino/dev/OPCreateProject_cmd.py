@@ -6,6 +6,7 @@ import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
 
+
 __commandname__ = "OPCreateProject"
 
 class CreateProject(forms.Dialog[bool]):
@@ -22,7 +23,7 @@ class CreateProject(forms.Dialog[bool]):
         
         # create attributes architects
         self.m_label_architect = forms.Label(Text = 'Architects')
-        self.m_textbox_architect = forms.TextBox(Text = None)
+        self.m_textbox_architect = forms.TextBox(Text = 'architect1, architect2')
         
         # create attributes civil engineer
         self.m_label_ceng = forms.Label(Text = 'Civil Engineer')
@@ -46,7 +47,7 @@ class CreateProject(forms.Dialog[bool]):
 
         # Create a table layout and add all the controls
         layout = forms.DynamicLayout()
-        layout.Spacing = drawing.Size(5, 5)
+        layout.Spacing = drawing.Size(80, 20)
         layout.AddRow(self.m_label_name, self.m_textbox_name)
         layout.AddRow(self.m_label_architect, self.m_textbox_architect)
         layout.AddRow(self.m_label_ceng, self.m_textbox_ceng)
@@ -84,10 +85,38 @@ def RequestNewProject():
     dialog = CreateProject();
     rc = dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     if (rc):
-        print( dialog.GetText() )
+        return dialog.GetText() 
+
+def AddParentLayer(lname):
+    if rs.IsLayer(lname):
+        return lname
+    else:
+        parent = rs.AddLayer(name=lname, color=None, visible=True, locked=False, parent=None)
+        rs.CurrentLayer(parent)
+        return parent
+
+def AddChildLayer(lname, parent):
+    # Add layer for new project
+    if rs.IsLayer(lname):
+        return lname
+    else:
+        layer = rs.AddLayer(name=lname, color=None, visible=True, locked=False, parent=parent)
+        rs.ParentLayer(layer=layer, parent=parent)
+        return layer
+
+def AddProjectLayers(name):
+    # Parent layer: Open Plans
+    parent = AddParentLayer('OpenPlans')
+
+    # add project layer
+    child = AddChildLayer(lname=name, parent=parent)
+
 
 def RunCommand( is_interactive ):
-    RequestNewProject()
+    project = RequestNewProject()
+
+    if project:    
+        layer = AddProjectLayers(project['name'])
 
 
 if __name__ == "__main__":
