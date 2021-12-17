@@ -22,17 +22,8 @@ class AddPlan(forms.Dialog[bool]):
         self.m_label_project = forms.Label(Text = 'Project')
         #Create Dropdown List
         self.m_dropdown_projects = forms.DropDown()
-        projects = rs.LayerChildren("OpenPlans")
-        # check if projects exist
-        if projects:
-            children = [ project.split('::')[1] for project in projects ]
-        # else give error message and exit process
-        else:
-            print("Failed to add plan: Please create a project first (use OPCreateProject cmd)")
-            self.Title = "Failed to add plan: Please create a project first with OPCreateProject"
-            self.Padding = drawing.Padding(230, 10)
-            return 0
-        self.m_dropdown_projects.DataStore = children
+        # set projects in layers as options in dropdown
+        self.m_dropdown_projects.DataStore = [ project.split('::')[1] for project in rs.LayerChildren("OpenPlans") ]
         # set default value
         self.m_dropdown_projects.SelectedIndex = 0
 
@@ -59,7 +50,7 @@ class AddPlan(forms.Dialog[bool]):
         layout.AddRow(self.m_label_type, self.m_textbox_type)
         layout.AddRow(self.m_label_floor, self.m_textbox_floor)
         layout.AddRow(None) # spacer
-        layout.AddRow(self.DefaultButton, self.AbortButton)
+        layout.AddRow(self.AbortButton, self.DefaultButton)
 
         self.Content = layout
 
@@ -71,7 +62,8 @@ class AddPlan(forms.Dialog[bool]):
                 }
 
     def GetProject(self):
-        return self.m_dropdown_projects.DataStore[self.m_dropdown_projects.SelectedIndex]
+        #return self.m_dropdown_projects.DataStore[self.m_dropdown_projects.SelectedIndex]
+        return self.m_dropdown_projects.SelectedIndex
 
     # Close button click handler
     def OnCloseButtonClick(self, sender, e):
@@ -81,14 +73,16 @@ class AddPlan(forms.Dialog[bool]):
     def OnOKButtonClick(self, sender, e):
         self.Close(True)
 
+
 def AddChildLayer(lname, parent):
     # Add layer for new project
-    if rs.IsLayer(lname):
+    if rs.IsLayer(lname) and rs.IsLayerParentOf(lname, parent):
         return lname
     else:
         layer = rs.AddLayer(name=lname, color=None, visible=True, locked=False, parent=parent)
         rs.ParentLayer(layer=layer, parent=parent)
         return layer
+
 
 # The script that will be using the dialog.
 def RequestNewPlan():
@@ -96,12 +90,31 @@ def RequestNewPlan():
     rc = dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     if (rc):
         return dialog.GetText(), dialog.GetProject()
+    else:
+        return None, None
+
+
+def CheckProjectExist():
+    # check if project exists
+    if rs.IsLayer("OpenPlans"):
+        projects = rs.LayerChildren("OpenPlans")
+    else:
+        print("Failed to add plan: Please create a project first (use OPCreateProject cmd)")
+        return
+    if projects:
+        return True
+    else:
+        print("Failed to add plan: Please create a project first (use OPCreateProject cmd)")
+        return
 
 
 def RunCommand( is_interactive ):
-    plan, project = RequestNewPlan()
+    if CheckProjectExist():
+        plan, project = RequestNewPlan()
+        AddChildLayer(lname=plan['floor'].zfill(2) + '_floor', parent=rs.LayerChildren("OpenPlans")[project])
+    else:
+        return
 
-    AddChildLayer(lname=plan['floor'].zfill(2) + '_floor', parent=project)
     
 
 if __name__ == "__main__":

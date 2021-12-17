@@ -22,7 +22,7 @@ class PolygonTagSelection(forms.Dialog[bool]):
         #Current project
         self.m_label_project = forms.Label(Text = 'Current Project:')
         self.m_textbox_project = forms.Label(Text = self.CurrentLayer.split("::")[1])
-
+        
         #Current floor
         self.m_label_floor = forms.Label(Text = 'Floor:')
         self.m_textbox_floor = forms.Label(Text = self.CurrentLayer.split("::")[2])
@@ -80,7 +80,7 @@ def RequestPolygonTag(polygonLayer):
 
 def AddChildLayer(lname, parent):
     # Add layer for new project
-    if rs.IsLayer(lname):
+    if rs.IsLayer(lname) and rs.IsLayerParentOf(lname, parent):
         return lname
     else:
         layer = rs.AddLayer(name=lname, color=None, visible=True, locked=False, parent=parent)
@@ -90,20 +90,53 @@ def AddChildLayer(lname, parent):
 
 def AddPolygon2Layer(obj, layer):
     rs.ObjectLayer(obj, layer=layer)
-    
+
+
+def CheckProjectExist():
+    # check if project exists
+    if rs.IsLayer("OpenPlans"):
+        projects = rs.LayerChildren("OpenPlans")
+    else:
+        print("Failed to tag polygon: Please create a project first (use OPCreateProject cmd)")
+        return
+    if projects:
+        return True
+    else:
+        print("Failed to tag polygon: Please create a project first (use OPCreateProject cmd)")
+        return
+
+
+def CheckObjectLayer(obj_layer):
+    # check if object is in the right layer depth
+    if len(obj_layer.split('::')) == 3:
+        # check if layer is part of a plan/floor
+        if obj_layer.split('::')[-1].split('_')[1] == 'floor':
+            return True, "Correct"
+        else:
+            return False, "Layer structure is not correct: Please check your layer names"
+    # check if object already has a tag
+    elif len(obj_layer.split('::')) == 4:
+        return False, 'Polygon is already tagged'
+    # other cases
+    else:
+        return False, "Polygon is not part of a Plan: Please assign your polygons to the correct layer"
+
 
 def RunCommand( is_interactive ):
-    # get a polygline
-    obj = rs.GetObject("Select a polygon to tag")
-    rs.SelectObject(obj, redraw=False)
-    obj_layer = rs.ObjectLayer(obj)
-    
-    tag = RequestPolygonTag(polygonLayer=obj_layer)
+    if CheckProjectExist():
+        # get a polyline
+        obj = rs.GetObject("Select a polygon to tag")
+        rs.SelectObject(obj, redraw=False)
+        obj_layer = rs.ObjectLayer(obj)
+        proceed, e = CheckObjectLayer(obj_layer)
+        if proceed is True:
+            # if no tag exists and object is in correct layer, tag can be assigned
+            tag = RequestPolygonTag(polygonLayer=obj_layer)
+            layer = AddChildLayer(tag, parent=obj_layer)
+            AddPolygon2Layer(obj, layer) 
+        else:
+            print(e)
 
-    if tag:    
-        layer = AddChildLayer(tag, parent=obj_layer)
-        AddPolygon2Layer(obj, layer)
     
-
 if __name__ == "__main__":
     RunCommand(True)

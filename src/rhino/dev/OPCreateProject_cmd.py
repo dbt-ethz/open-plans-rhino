@@ -5,6 +5,7 @@ import System
 import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
+import datetime
 
 
 __commandname__ = "OPCreateProject"
@@ -22,8 +23,8 @@ class CreateProject(forms.Dialog[bool]):
         self.m_textbox_name = forms.TextBox(Text = None)
         
         # create attributes architects
-        self.m_label_architect = forms.Label(Text = 'Architects')
-        self.m_textbox_architect = forms.TextBox(Text = 'architect1, architect2')
+        self.m_label_architect = forms.Label(Text = 'Architect(s) (separate architects with ",")')
+        self.m_textbox_architect = forms.TextBox()
         
         # create attributes civil engineer
         self.m_label_ceng = forms.Label(Text = 'Civil Engineer')
@@ -35,7 +36,14 @@ class CreateProject(forms.Dialog[bool]):
        
         # create attributes year of completion
         self.m_label_yoc = forms.Label(Text = 'Year of Completion')
-        self.m_textbox_yoc = forms.TextBox(Text = None)
+        self.m_numeric_yoc = forms.TextBox()
+        self.m_numeric_yoc.MaxLength = 4
+        self.m_numeric_yoc.PlaceholderText = '1990'
+
+        # create description multiline textbox
+        self.m_label_richtext = forms.Label(Text = 'Project description')
+        self.m_richtextarea = forms.RichTextArea()
+        self.m_richtextarea.Size = drawing.Size(210, 100)
 
         # Create the default button
         self.DefaultButton = forms.Button(Text = 'Create')
@@ -47,14 +55,15 @@ class CreateProject(forms.Dialog[bool]):
 
         # Create a table layout and add all the controls
         layout = forms.DynamicLayout()
-        layout.Spacing = drawing.Size(80, 20)
+        layout.Spacing = drawing.Size(100, 10)
         layout.AddRow(self.m_label_name, self.m_textbox_name)
         layout.AddRow(self.m_label_architect, self.m_textbox_architect)
         layout.AddRow(self.m_label_ceng, self.m_textbox_ceng)
         layout.AddRow(self.m_label_client, self.m_textbox_client)
-        layout.AddRow(self.m_label_yoc, self.m_textbox_yoc)
+        layout.AddRow(self.m_label_yoc, self.m_numeric_yoc)
+        layout.AddRow(self.m_label_richtext, self.m_richtextarea)
         layout.AddRow(None) # spacer
-        layout.AddRow(self.DefaultButton, self.AbortButton)
+        layout.AddRow(self.AbortButton, self.DefaultButton)
 
         self.Content = layout
 
@@ -65,7 +74,8 @@ class CreateProject(forms.Dialog[bool]):
                 'architects':self.m_textbox_architect.Text,
                 'civil_engineer':self.m_textbox_ceng.Text,
                 'client':self.m_textbox_client.Text,
-                'year_of_completion':self.m_textbox_yoc.Text
+                'year_of_completion':self.m_numeric_yoc.Text,
+                'description':self.m_richtextarea.Text
                 }
         
 
@@ -114,6 +124,7 @@ def AddProjectLayers(name):
 
 def RunCommand( is_interactive ):
     project = RequestNewProject()
+    print(project)
 
     if project:    
         layer = AddProjectLayers(project['name'])
