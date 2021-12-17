@@ -128,6 +128,7 @@ def RunCommand( is_interactive ):
         obj = rs.GetObject("Select a polygon to tag")
         rs.SelectObject(obj, redraw=False)
         obj_layer = rs.ObjectLayer(obj)
+        # check if object is in correct layer depth
         proceed, e = CheckObjectLayer(obj_layer)
         if proceed is True:
             # if no tag exists and object is in correct layer, tag can be assigned
