@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
+
 import rhinoscriptsyntax as rs
 import Rhino
 import scriptcontext
@@ -6,8 +10,11 @@ import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
 
+from helpers import AddChildLayer, CheckProjectExist
+
 
 __commandname__ = "TagPlanPolygon"
+
 
 class PolygonTagSelection(forms.Dialog[bool]):
 
@@ -78,32 +85,8 @@ def RequestPolygonTag(polygonLayer):
         return dialog.GetText()
 
 
-def AddChildLayer(lname, parent):
-    # Add layer for new project
-    if rs.IsLayer(lname) and rs.IsLayerParentOf(lname, parent):
-        return lname
-    else:
-        layer = rs.AddLayer(name=lname, color=None, visible=True, locked=False, parent=parent)
-        rs.ParentLayer(layer=layer, parent=parent)
-        return layer
-
-
 def AddPolygon2Layer(obj, layer):
     rs.ObjectLayer(obj, layer=layer)
-
-
-def CheckProjectExist():
-    # check if project exists
-    if rs.IsLayer("OpenPlans"):
-        projects = rs.LayerChildren("OpenPlans")
-    else:
-        print("Failed to tag polygon: Please create a project first (use OPCreateProject cmd)")
-        return
-    if projects:
-        return True
-    else:
-        print("Failed to tag polygon: Please create a project first (use OPCreateProject cmd)")
-        return
 
 
 def CheckObjectLayer(obj_layer):

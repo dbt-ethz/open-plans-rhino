@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from __future__ import division
+
 import rhinoscriptsyntax as rs
 import Rhino
 import scriptcontext
@@ -5,10 +9,12 @@ import System
 import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
-import datetime
+
+from helpers import AddChildLayer
 
 
 __commandname__ = "OPCreateProject"
+
 
 class CreateProject(forms.Dialog[bool]):
 
@@ -45,6 +51,10 @@ class CreateProject(forms.Dialog[bool]):
         self.m_richtextarea = forms.RichTextArea()
         self.m_richtextarea.Size = drawing.Size(210, 100)
 
+        # create attributes source
+        self.m_label_source = forms.Label(Text = 'Source information')
+        self.m_textbox_source = forms.TextBox(Text = None)
+
         # Create the default button
         self.DefaultButton = forms.Button(Text = 'Create')
         self.DefaultButton.Click += self.OnOKButtonClick
@@ -60,6 +70,7 @@ class CreateProject(forms.Dialog[bool]):
         layout.AddRow(self.m_label_architect, self.m_textbox_architect)
         layout.AddRow(self.m_label_ceng, self.m_textbox_ceng)
         layout.AddRow(self.m_label_client, self.m_textbox_client)
+        layout.AddRow(self.m_label_source, self.m_textbox_source)
         layout.AddRow(self.m_label_yoc, self.m_numeric_yoc)
         layout.AddRow(self.m_label_richtext, self.m_richtextarea)
         layout.AddRow(None) # spacer
@@ -75,6 +86,7 @@ class CreateProject(forms.Dialog[bool]):
                 'civil_engineer':self.m_textbox_ceng.Text,
                 'client':self.m_textbox_client.Text,
                 'year_of_completion':self.m_numeric_yoc.Text,
+                'source':self.m_textbox_source.Text,
                 'description':self.m_richtextarea.Text
                 }
         
@@ -104,15 +116,6 @@ def AddParentLayer(lname):
         parent = rs.AddLayer(name=lname, color=None, visible=True, locked=False, parent=None)
         rs.CurrentLayer(parent)
         return parent
-
-def AddChildLayer(lname, parent):
-    # Add layer for new project
-    if rs.IsLayer(lname):
-        return lname
-    else:
-        layer = rs.AddLayer(name=lname, color=None, visible=True, locked=False, parent=parent)
-        rs.ParentLayer(layer=layer, parent=parent)
-        return layer
 
 def AddProjectLayers(name):
     # Parent layer: Open Plans
