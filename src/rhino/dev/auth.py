@@ -14,7 +14,7 @@ def Login(email, password):
         json_string = response.read().decode('utf-8')
         retVal = dict(json.loads(json_string))
         return retVal  
-    except HTTPError, e:
+    except HTTPError as e:
         print(e)
 
 
@@ -26,5 +26,5 @@ def checkLoginStatus():
         json_string = response.read().decode('utf-8');
         retVal = dict(json.loads(json_string))
         return retVal
-    except HTTPError, e:
+    except HTTPError as e:
         print(e)
