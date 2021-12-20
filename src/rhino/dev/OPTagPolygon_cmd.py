@@ -13,7 +13,7 @@ import Eto.Forms as forms
 from helpers import AddChildLayer, CheckProjectExist
 
 
-__commandname__ = "TagPlanPolygon"
+__commandname__ = "OPTagPlanPolygon"
 
 
 class PolygonTagSelection(forms.Dialog[bool]):
