@@ -4,7 +4,7 @@ import json
 from uri import URI
 
 
-def FetchPolygonTypes():
+def fetchPolygonTypes():
     url = URI + '/polygon_type/all'
     req = urllib2.Request(url)
 

@@ -4,7 +4,7 @@ import json
 from uri import URI
 
 
-def SaveProject(project):
+def saveProject(project):
     url = URI + '/project/save'
     data = json.dumps(project)
     req = urllib2.Request(url)
@@ -19,7 +19,7 @@ def SaveProject(project):
         print(e)
 
 
-def FetchProject(project_id):
+def fetchProject(project_id):
     url = URI + '/project/fetch/{}'.format(project_id)
     req = urllib2.Request(url)
 
@@ -32,7 +32,7 @@ def FetchProject(project_id):
         print(e)
 
 
-def FetchAccountProject(account_id, number, page=1):
+def fetchAccountProject(account_id, number, page=1):
     url = URI + '/project/fetch/account/{}?number={}&page={}'.format(account_id, number, page)
     req = urllib2.Request(url)
 

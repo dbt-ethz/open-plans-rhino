@@ -4,7 +4,7 @@ import json
 from uri import URI
 
 
-def FetchPlan(plan_id):
+def fetchPlan(plan_id):
     url = URI + '/plan/fetch/{}'.format(plan_id)
     req = urllib2.Request(url)
 
