@@ -10,7 +10,8 @@ import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
 
-from helpers import AddChildLayer, CheckProjectExist
+from helpers import AddChildLayer
+from decorators import ProjectCheck
 
 
 __commandname__ = "OPAddPlanToProject"
@@ -26,28 +27,28 @@ class AddPlan(forms.Dialog[bool]):
         self.Resizable = False
 
         # create dropwdown for existing projects
-        self.m_label_project = forms.Label(Text = 'Project')
-        #Create Dropdown List
+        self.m_label_project = forms.Label(Text='Project')
+        # Create Dropdown List
         self.m_dropdown_projects = forms.DropDown()
         # set projects in layers as options in dropdown
-        self.m_dropdown_projects.DataStore = [ project.split('::')[1] for project in rs.LayerChildren("OpenPlans") ]
+        self.m_dropdown_projects.DataStore = [project.split('::')[1] for project in rs.LayerChildren("OpenPlans")]
         # set default value
         self.m_dropdown_projects.SelectedIndex = 0
 
         # create attributes type
-        self.m_label_type = forms.Label(Text = 'Type')
-        self.m_textbox_type = forms.TextBox(Text = 'floorplan')
-        
+        self.m_label_type = forms.Label(Text='Type')
+        self.m_textbox_type = forms.TextBox(Text='floorplan')
+
         # create attributes architects
-        self.m_label_floor = forms.Label(Text = 'floor level')
-        self.m_textbox_floor = forms.TextBox(Text = '0')
+        self.m_label_floor = forms.Label(Text='floor level')
+        self.m_textbox_floor = forms.TextBox(Text='0')
 
         # Create the default button
-        self.DefaultButton = forms.Button(Text = 'Add')
+        self.DefaultButton = forms.Button(Text='Add')
         self.DefaultButton.Click += self.OnOKButtonClick
 
         # Create the abort button
-        self.AbortButton = forms.Button(Text = 'Cancel')
+        self.AbortButton = forms.Button(Text='Cancel')
         self.AbortButton.Click += self.OnCloseButtonClick
 
         # Create a table layout and add all the controls
@@ -56,7 +57,7 @@ class AddPlan(forms.Dialog[bool]):
         layout.AddRow(self.m_label_project, self.m_dropdown_projects)
         layout.AddRow(self.m_label_type, self.m_textbox_type)
         layout.AddRow(self.m_label_floor, self.m_textbox_floor)
-        layout.AddRow(None) # spacer
+        layout.AddRow(None)  # spacer
         layout.AddRow(self.AbortButton, self.DefaultButton)
 
         self.Content = layout
@@ -64,12 +65,12 @@ class AddPlan(forms.Dialog[bool]):
     # Get the value of the textbox
     def GetText(self):
         return {
-                'type':self.m_textbox_type.Text,
-                'floor':self.m_textbox_floor.Text
-                }
+            'type': self.m_textbox_type.Text,
+            'floor': self.m_textbox_floor.Text
+        }
 
     def GetProject(self):
-        #return self.m_dropdown_projects.DataStore[self.m_dropdown_projects.SelectedIndex]
+        # return self.m_dropdown_projects.DataStore[self.m_dropdown_projects.SelectedIndex]
         return self.m_dropdown_projects.SelectedIndex
 
     # Close button click handler
@@ -83,7 +84,7 @@ class AddPlan(forms.Dialog[bool]):
 
 # The script that will be using the dialog.
 def RequestNewPlan():
-    dialog = AddPlan();
+    dialog = AddPlan()
     rc = dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     if (rc):
         return dialog.GetText(), dialog.GetProject()
@@ -91,14 +92,14 @@ def RequestNewPlan():
         return None, None
 
 
-def RunCommand( is_interactive ):
-    if CheckProjectExist():
-        plan, project = RequestNewPlan()
-        AddChildLayer(lname=plan['floor'].zfill(2) + '_floor', parent=rs.LayerChildren("OpenPlans")[project])
-    else:
-        return
+@ProjectCheck
+def RunCommand(is_interactive):
+    plan, project = RequestNewPlan()
+    if plan:
+        AddChildLayer(lname=plan['floor'].zfill(
+            2) + '_floor', parent=rs.LayerChildren("OpenPlans")[project])
 
-    
+
 
 if __name__ == "__main__":
     RunCommand(True)

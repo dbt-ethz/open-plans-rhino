@@ -1,4 +1,5 @@
-import urllib, urllib2
+import urllib
+import urllib2
 from urllib2 import HTTPError
 import json
 from uri import URI
@@ -14,7 +15,7 @@ def saveProject(project):
         response = urllib2.urlopen(req)
         json_string = response.read().decode('utf-8')
         retVal = dict(json.loads(json_string))
-        return retVal  
+        return retVal
     except HTTPError as e:
         print(e)
 
@@ -27,19 +28,21 @@ def fetchProject(project_id):
         response = urllib2.urlopen(req)
         json_string = response.read().decode('utf-8')
         retVal = dict(json.loads(json_string))
-        return retVal  
+        return retVal
     except HTTPError as e:
         print(e)
 
 
 def fetchAccountProject(account_id, number, page=1):
-    url = URI + '/project/fetch/account/{}?number={}&page={}'.format(account_id, number, page)
+    url = URI + \
+        '/project/fetch/account/{}?number={}&page={}'.format(
+            account_id, number, page)
     req = urllib2.Request(url)
 
     try:
         response = urllib2.urlopen(req)
         json_string = response.read().decode('utf-8')
         retVal = dict(json.loads(json_string))
-        return retVal  
+        return retVal
     except HTTPError as e:
         print(e)
