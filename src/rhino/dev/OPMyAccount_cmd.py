@@ -10,8 +10,9 @@ import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
 
-from auth import Login, checkLoginStatus
 
+from api.auth import Login, checkLoginStatus, Logout
+from dataclasses.User import User
 
 __commandname__ = "OPMyAccount"
 
@@ -52,18 +53,18 @@ class AccountInfo(forms.Dialog[bool]):
         grouplayout_login.Spacing = drawing.Size(200, 20)
         # email
         label_email_login = forms.Label(Text='Email:')
-        textbox_email_login = forms.TextBox()
+        self.textbox_email_login = forms.TextBox()
         # password
         label_pw_login = forms.Label(Text='Password:')
-        passwordbox_pw_login = forms.PasswordBox()
+        self.passwordbox_pw_login = forms.PasswordBox()
         # check for account existinf
         checkbox_new = forms.CheckBox(Text='Create New Account')
         # login button
         self.LoginButton = forms.Button(Text='Sign in')
         self.LoginButton.Click += self.OnLoginButtonClick
         # add to layout
-        grouplayout_login.AddRow(label_email_login, textbox_email_login)
-        grouplayout_login.AddRow(label_pw_login, passwordbox_pw_login)
+        grouplayout_login.AddRow(label_email_login, self.textbox_email_login)
+        grouplayout_login.AddRow(label_pw_login, self.passwordbox_pw_login)
         grouplayout_login.AddRow(checkbox_new, self.LoginButton)
         self.m_groupbox_login.Content = grouplayout_login
 
@@ -84,7 +85,10 @@ class AccountInfo(forms.Dialog[bool]):
 
     # Get the value of the textbox
     def GetText(self):
-        return self.m_combobox.Text
+        return {
+            'email': self.textbox_email_login.Text,
+            'password': self.passwordbox_pw_login.Text
+        }
 
     # Close button click handler
     def OnCloseButtonClick(self, sender, e):
@@ -92,19 +96,16 @@ class AccountInfo(forms.Dialog[bool]):
 
     # OK button click handler
     def OnLoginButtonClick(self, sender, e):
-        if self.m_combobox.Text == "":
-            print("Failed to add tag: No tag is given")
-            self.Close(False)
+        if self.textbox_email_login.Text == "" or self.passwordbox_pw_login.Text == "":
+            print("Please provide credentials")
         else:
             self.Close(True)
 
-    # signout button click handler
+
+    # signout
     def OnSignOutButtonClick(self, sender, e):
-        if self.m_combobox.Text == "":
-            print("Failed to add tag: No tag is given")
-            self.Close(False)
-        else:
-            self.Close(True)
+        Logout()
+        self.Close(True)
 
     @staticmethod
     def getLoginStatus():
@@ -120,8 +121,10 @@ def RequestAccount():
 
 
 def RunCommand(is_interactive):
-    RequestAccount()
-
+    credentials = RequestAccount()
+    if credentials:
+        user = User(email=credentials['email'])
+        user.userLogin(password=credentials['password'])
 
 if __name__ == "__main__":
     RunCommand(True)
