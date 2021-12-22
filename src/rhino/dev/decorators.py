@@ -5,7 +5,7 @@ from __future__ import division
 import rhinoscriptsyntax as rs
 
 
-def ProjectCheck(func):
+def projectcheck(func):
     def wrapper(*args):
         # check if project exists
         if rs.IsLayer("OpenPlans"):
@@ -16,5 +16,5 @@ def ProjectCheck(func):
                 print("Error: Please create a project first (use OPCreateProject cmd)")
         else:
             print("Error: Please create a project first (use OPCreateProject cmd)")
-        
+
     return wrapper

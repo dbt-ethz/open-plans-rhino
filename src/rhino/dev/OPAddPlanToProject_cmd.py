@@ -11,7 +11,7 @@ import Eto.Drawing as drawing
 import Eto.Forms as forms
 
 from helpers import AddChildLayer
-from decorators import ProjectCheck
+from decorators import projectcheck
 
 
 __commandname__ = "OPAddPlanToProject"
@@ -92,7 +92,7 @@ def RequestNewPlan():
         return None, None
 
 
-@ProjectCheck
+@projectcheck
 def RunCommand(is_interactive):
     plan, project = RequestNewPlan()
     if plan:

@@ -11,7 +11,7 @@ import Eto.Drawing as drawing
 import Eto.Forms as forms
 
 from helpers import AddChildLayer
-from decorators import ProjectCheck
+from decorators import projectcheck
 
 
 __commandname__ = "OPTagPlanPolygon"
@@ -114,7 +114,7 @@ def CheckObjectLayer(obj_layer):
         return False, "Polygon is not part of a Plan: Please assign your polygons to the correct layer"
 
 
-@ProjectCheck
+@projectcheck
 def RunCommand(is_interactive):
     # get a polyline
     obj = RequestPolygon()

@@ -122,20 +122,12 @@ def AddParentLayer(lname):
         return parent
 
 
-def AddProjectLayers(name):
-    # Parent layer: Open Plans
-    parent = AddParentLayer('OpenPlans')
-
-    # add project layer
-    child = AddChildLayer(lname=name, parent=parent)
-
-
 def RunCommand(is_interactive):
     project = RequestNewProject()
-    print(project)
 
     if project:
-        layer = AddProjectLayers(project['name'])
+        parent = AddParentLayer('OpenPlans')
+        layer = AddChildLayer(lname=project['name'], parent=parent)
 
 
 if __name__ == "__main__":
