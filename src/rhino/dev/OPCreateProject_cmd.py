@@ -11,7 +11,7 @@ import Eto.Drawing as drawing
 import Eto.Forms as forms
 
 from helpers import AddChildLayer
-from dataclasses.Project import Project
+from datamodels.ProjectClass import ProjectData
 
 __commandname__ = "OPCreateProject"
 
@@ -123,13 +123,14 @@ def AddParentLayer(lname):
 
 
 def RunCommand(is_interactive):
-    project = RequestNewProject()
+    newProject = RequestNewProject()
 
-    if project:
-        newproj = Project(project)
-        print(newproj.__dict__)
+    if newProject:
+        project = ProjectData()
+        project.modify_project(newProject)
+        print(project.jsonStr())
         parent = AddParentLayer('OpenPlans')
-        layer = AddChildLayer(lname=project['name'], parent=parent)
+        layer = AddChildLayer(lname=newProject['name'], parent=parent)
 
 
 if __name__ == "__main__":

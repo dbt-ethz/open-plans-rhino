@@ -24,3 +24,9 @@ def AddChildLayer(lname, parent):
                             visible=True, locked=False, parent=parent)
         rs.ParentLayer(layer=layer, parent=parent)
         return layer
+
+
+def merge_dicts(dict_a, dict_b):
+    c = dict_a.copy()
+    c.update(dict_b)
+    return c

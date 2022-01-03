@@ -12,7 +12,7 @@ import Eto.Forms as forms
 
 
 from api.auth import Login, checkLoginStatus, Logout
-from dataclasses.User import User
+from datamodels.User import User
 
 __commandname__ = "OPMyAccount"
 
