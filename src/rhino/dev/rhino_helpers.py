@@ -26,7 +26,8 @@ def AddChildLayer(lname, parent):
         return layer
 
 
-def merge_dicts(dict_a, dict_b):
-    c = dict_a.copy()
-    c.update(dict_b)
-    return c
+def ProjectToRhinoLayers(project):
+    parent = AddParentLayer('OpenPlans')
+    layername = "ID: {}; Name: {}".format(
+        project['id'], project['name'])
+    layer = AddChildLayer(lname=layername, parent=parent)

@@ -10,8 +10,9 @@ import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
 
-from helpers import AddChildLayer
+from rhino_helpers import AddChildLayer, AddParentLayer, ProjectToRhinoLayers
 from datamodels.ProjectClass import ProjectData
+from api.project import fetchProject
 
 __commandname__ = "OPCreateProject"
 
@@ -112,25 +113,29 @@ def RequestNewProject():
         return dialog.GetText()
 
 
-def AddParentLayer(lname):
-    if rs.IsLayer(lname):
-        return lname
-    else:
-        parent = rs.AddLayer(name=lname, color=None,
-                             visible=True, locked=False, parent=None)
-        rs.CurrentLayer(parent)
-        return parent
+def createNewProject(newproj):
+    project = ProjectData()
+    # modify empty project template with new project data
+    project.modify_project(newproj)
+    # upload project to OP database
+    #project_id = project.saveProjectToOpenPlans()
+    project_id = 557
+    # retrieve project from open plans database
+    if project_id:
+        resp = fetchProject(project_id=project_id)
+        if resp['succeeded']:
+            return ProjectData(project=resp['project'], plans=resp['project']['plans'])
+        else:
+            print(resp['error'])
 
 
 def RunCommand(is_interactive):
     newProject = RequestNewProject()
 
     if newProject:
-        project = ProjectData()
-        project.modify_project(newProject)
-        print(project.jsonStr())
-        parent = AddParentLayer('OpenPlans')
-        layer = AddChildLayer(lname=newProject['name'], parent=parent)
+        openplansproject = createNewProject(newProject)
+        # add project to rhino layers
+        ProjectToRhinoLayers(openplansproject.project)
 
 
 if __name__ == "__main__":

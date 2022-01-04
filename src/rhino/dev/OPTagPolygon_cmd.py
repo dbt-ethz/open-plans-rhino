@@ -10,7 +10,7 @@ import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
 
-from helpers import AddChildLayer
+from rhino_helpers import AddChildLayer
 from decorators import projectcheck
 
 

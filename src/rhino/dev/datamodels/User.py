@@ -23,7 +23,7 @@ class User:
 
     def userLogin(self, password):
         resp = Login(email=self.email, password=password)
-        if resp['succeeded'] == 1:
+        if resp['succeeded']:
             self.__id = resp['account_id']
             print('Login succesfull; {}'.format(self.__repr__()))
         else:
