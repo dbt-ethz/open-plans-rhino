@@ -3,10 +3,10 @@ from __future__ import absolute_import
 from __future__ import division
 import json
 
-from datamodels.Plan import PLAN
-from datamodels.Project import PROJECT
-from datamodels.Polygon import POLYGON
-from api.project import saveProject
+from datamodels.plan_model import PLAN
+from datamodels.project_model import PROJECT
+from datamodels.polygon_model import POLYGON
+import api
 
 
 class ProjectData:
@@ -40,8 +40,8 @@ class ProjectData:
         for key in kwargs:
             self.__project[key] = kwargs[key]
 
-    def saveProjectToOpenPlans(self):
-        resp = saveProject(self.project)
+    def save_project_to_openplans(self):
+        resp = api.save_project(self.project)
         if resp['succeeded']:
             project_id = resp['project_id']
             return project_id

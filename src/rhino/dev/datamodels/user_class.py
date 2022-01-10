@@ -2,7 +2,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 
-from api.auth import Login
+import api
 
 
 class User:
@@ -21,8 +21,8 @@ class User:
     def __repr__(self):
         return "{}(id={}, email={})".format(self.__class__.__name__, self.id, self.email)
 
-    def userLogin(self, password):
-        resp = Login(email=self.email, password=password)
+    def user_login(self, password):
+        resp = api.login(email=self.email, password=password)
         if resp['succeeded']:
             self.__id = resp['account_id']
             print('Login succesfull; {}'.format(self.__repr__()))

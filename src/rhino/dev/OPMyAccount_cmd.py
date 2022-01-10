@@ -25,7 +25,7 @@ class AccountInfo(forms.Dialog[bool]):
         self.Padding = drawing.Padding(10)
         self.Resizable = False
 
-        self.LoginStatus = self.getLoginStatus()
+        self.LoginStatus = self.get_login_status()
         # Satus Groupbox
         self.m_groupbox_status = forms.GroupBox(Text='Account Status')
         self.m_groupbox_status.Padding = drawing.Padding(5)
@@ -37,7 +37,7 @@ class AccountInfo(forms.Dialog[bool]):
         box_status = forms.Label(Text=str(self.LoginStatus))
         # logout button
         self.SignOutButton = forms.Button(Text='Sign out')
-        self.SignOutButton.Click += self.OnSignOutButtonClick
+        self.SignOutButton.Click += self.on_sign_out_button_click
         self.SignOutButton.Enabled = self.LoginStatus
         # add to layout
         grouplayout_status.AddRow(label_status, box_status)
@@ -60,7 +60,7 @@ class AccountInfo(forms.Dialog[bool]):
         checkbox_new = forms.CheckBox(Text='Create New Account')
         # login button
         self.LoginButton = forms.Button(Text='Sign in')
-        self.LoginButton.Click += self.OnLoginButtonClick
+        self.LoginButton.Click += self.on_login_button_click
         # add to layout
         grouplayout_login.AddRow(label_email_login, self.textbox_email_login)
         grouplayout_login.AddRow(label_pw_login, self.passwordbox_pw_login)
@@ -69,7 +69,7 @@ class AccountInfo(forms.Dialog[bool]):
 
         # Create the abort button
         self.AbortButton = forms.Button(Text='Cancel')
-        self.AbortButton.Click += self.OnCloseButtonClick
+        self.AbortButton.Click += self.on_close_button_click
 
         # Create a table layout and add all the controls
         layout = forms.DynamicLayout()
@@ -83,18 +83,18 @@ class AccountInfo(forms.Dialog[bool]):
         self.Content = layout
 
     # Get the value of the textbox
-    def GetText(self):
+    def get_text(self):
         return {
             'email': self.textbox_email_login.Text,
             'password': self.passwordbox_pw_login.Text
         }
 
     # Close button click handler
-    def OnCloseButtonClick(self, sender, e):
+    def on_close_button_click(self, sender, e):
         self.Close(False)
 
     # OK button click handler
-    def OnLoginButtonClick(self, sender, e):
+    def on_login_button_click(self, sender, e):
         if self.textbox_email_login.Text == "" or self.passwordbox_pw_login.Text == "":
             print("Please provide credentials")
         else:
@@ -102,29 +102,29 @@ class AccountInfo(forms.Dialog[bool]):
 
     # signout
 
-    def OnSignOutButtonClick(self, sender, e):
-        api.Logout()
+    def on_sign_out_button_click(self, sender, e):
+        api.logout()
         self.Close(True)
 
     @staticmethod
-    def getLoginStatus():
-        return api.checkLoginStatus()['is_logged']
+    def get_login_status():
+        return api.check_login_status()['is_logged']
 
 
 # The script that will be using the dialog.
-def RequestAccount():
+def request_account():
     dialog = AccountInfo()
     rc = dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     if (rc):
-        return dialog.GetText()
+        return dialog.get_text()
 
 
-def RunCommand(is_interactive):
-    credentials = RequestAccount()
+def run_command(is_interactive):
+    credentials = request_account()
     if credentials:
         user = models.User(email=credentials['email'])
-        user.userLogin(password=credentials['password'])
+        user.user_login(password=credentials['password'])
 
 
 if __name__ == "__main__":
-    RunCommand(True)
+    run_command(True)

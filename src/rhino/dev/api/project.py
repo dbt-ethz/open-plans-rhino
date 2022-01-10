@@ -1,11 +1,10 @@
-import urllib
 import urllib2
 from urllib2 import HTTPError
 import json
 from uri import URI
 
 
-def saveProject(project):
+def save_project(project):
     url = URI + '/project/save'
     data = json.dumps(project)
     req = urllib2.Request(url)
@@ -20,7 +19,7 @@ def saveProject(project):
         print(e)
 
 
-def fetchProject(project_id):
+def fetch_project(project_id):
     url = URI + '/project/fetch/{}'.format(project_id)
     req = urllib2.Request(url)
 
@@ -33,7 +32,7 @@ def fetchProject(project_id):
         print(e)
 
 
-def fetchAccountProject(account_id, number, page=1):
+def fetch_account_project(account_id, number, page=1):
     url = URI + \
         '/project/fetch/account/{}?number={}&page={}'.format(
             account_id, number, page)

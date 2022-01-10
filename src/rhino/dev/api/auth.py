@@ -1,11 +1,10 @@
-import urllib
 import urllib2
 from urllib2 import HTTPError
 import json
 from uri import URI
 
 
-def Login(email, password):
+def login(email, password):
     url = URI + '/auth/login'
     data = json.dumps({'email': email,
                        'password': password})
@@ -21,7 +20,7 @@ def Login(email, password):
         print(e)
 
 
-def checkLoginStatus():
+def check_login_status():
     url = URI + 'auth/status'
     req = urllib2.Request(url)
     try:
@@ -33,7 +32,7 @@ def checkLoginStatus():
         print(e)
 
 
-def Logout():
+def logout():
     url = URI + 'auth/logout'
     req = urllib2.Request(url)
     try:

@@ -59,11 +59,11 @@ class CreateProject(forms.Dialog[bool]):
 
         # Create the default button
         self.DefaultButton = forms.Button(Text='Create')
-        self.DefaultButton.Click += self.OnOKButtonClick
+        self.DefaultButton.Click += self.on_OK_button_click
 
         # Create the abort button
         self.AbortButton = forms.Button(Text='Cancel')
-        self.AbortButton.Click += self.OnCloseButtonClick
+        self.AbortButton.Click += self.on_close_button_click
 
         # Create a table layout and add all the controls
         layout = forms.DynamicLayout()
@@ -81,7 +81,7 @@ class CreateProject(forms.Dialog[bool]):
         self.Content = layout
 
     # Get the value of the textbox
-    def GetText(self):
+    def get_text(self):
         return {
             'name': self.m_textbox_name.Text,
             'architects': self.m_textbox_architect.Text,
@@ -94,11 +94,11 @@ class CreateProject(forms.Dialog[bool]):
 
     # Close button click handler
 
-    def OnCloseButtonClick(self, sender, e):
+    def on_close_button_click(self, sender, e):
         self.Close(False)
 
     # OK button click handler
-    def OnOKButtonClick(self, sender, e):
+    def on_OK_button_click(self, sender, e):
         if self.m_textbox_name.Text == "":
             print("Failed to create project: Name is required")
             self.Close(False)
@@ -106,14 +106,14 @@ class CreateProject(forms.Dialog[bool]):
             self.Close(True)
 
 
-def RequestNewProject():
+def request_new_project():
     dialog = CreateProject()
     rc = dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     if (rc):
-        return dialog.GetText()
+        return dialog.get_text()
 
 
-def createNewProject(newproj):
+def create_new_project(newproj):
     project = models.ProjectData()
     # modify empty project template with new project data
     project.modify_project(newproj)
@@ -122,21 +122,22 @@ def createNewProject(newproj):
     project_id = 557
     # retrieve project from open plans database
     if project_id:
-        resp = api.fetchProject(project_id=project_id)
+        resp = api.fetch_project(project_id=project_id)
         if resp['succeeded']:
-            return models.ProjectData(project=resp['project'], plans=resp['project']['plans'])
+            return models.ProjectData(project=resp['project'],
+                                      plans=resp['project']['plans'])
         else:
             print(resp['error'])
 
 
-def RunCommand(is_interactive):
-    newProject = RequestNewProject()
+def run_command(is_interactive):
+    new_project = request_new_project()
 
-    if newProject:
-        openplansproject = createNewProject(newProject)
+    if new_project:
+        openplansproject = create_new_project(new_project)
         # add project to rhino layers
-        rhh.ProjectToRhinoLayers(openplansproject.project)
+        rhh.project_to_rhino_layers(openplansproject.project)
 
 
 if __name__ == "__main__":
-    RunCommand(True)
+    run_command(True)

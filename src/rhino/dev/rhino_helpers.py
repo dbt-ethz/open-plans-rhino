@@ -5,7 +5,7 @@ from __future__ import division
 import rhinoscriptsyntax as rs
 
 
-def AddParentLayer(lname):
+def add_parent_layer(lname):
     if rs.IsLayer(lname):
         return lname
     else:
@@ -15,7 +15,7 @@ def AddParentLayer(lname):
         return parent
 
 
-def AddChildLayer(lname, parent):
+def add_child_layer(lname, parent):
     # Add layer for new project
     if rs.IsLayer(lname) and rs.IsLayerParentOf(lname, parent):
         return lname
@@ -26,8 +26,8 @@ def AddChildLayer(lname, parent):
         return layer
 
 
-def ProjectToRhinoLayers(project):
-    parent = AddParentLayer('OpenPlans')
+def project_to_rhino_layers(project):
+    parent = add_parent_layer('OpenPlans')
     layername = "ID: {}; Name: {}".format(
         project['id'], project['name'])
-    layer = AddChildLayer(lname=layername, parent=parent)
+    layer = add_child_layer(lname=layername, parent=parent)

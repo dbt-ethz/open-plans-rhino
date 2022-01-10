@@ -1,2 +1,2 @@
-from .ProjectClass import *
-from .User import *
+from .project_class import *
+from .user_class import *

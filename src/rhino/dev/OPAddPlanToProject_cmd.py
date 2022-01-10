@@ -45,11 +45,11 @@ class AddPlan(forms.Dialog[bool]):
 
         # Create the default button
         self.DefaultButton = forms.Button(Text='Add')
-        self.DefaultButton.Click += self.OnOKButtonClick
+        self.DefaultButton.Click += self.on_OK_button_click
 
         # Create the abort button
         self.AbortButton = forms.Button(Text='Cancel')
-        self.AbortButton.Click += self.OnCloseButtonClick
+        self.AbortButton.Click += self.on_close_button_click
 
         # Create a table layout and add all the controls
         layout = forms.DynamicLayout()
@@ -63,43 +63,43 @@ class AddPlan(forms.Dialog[bool]):
         self.Content = layout
 
     # Get the value of the textbox
-    def GetText(self):
+    def get_text(self):
         return {
             'type': self.m_textbox_type.Text,
             'floor': self.m_textbox_floor.Text
         }
 
-    def GetProject(self):
+    def get_project(self):
         # return self.m_dropdown_projects.DataStore[self.m_dropdown_projects.SelectedIndex]
         return self.m_dropdown_projects.SelectedIndex
 
     # Close button click handler
-    def OnCloseButtonClick(self, sender, e):
+    def on_close_button_click(self, sender, e):
         self.Close(False)
 
     # OK button click handler
-    def OnOKButtonClick(self, sender, e):
+    def on_OK_button_click(self, sender, e):
         self.Close(True)
 
 
 # The script that will be using the dialog.
-def RequestNewPlan():
+def request_new_plan():
     dialog = AddPlan()
     rc = dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     if (rc):
-        return dialog.GetText(), dialog.GetProject()
+        return dialog.get_text(), dialog.get_project()
     else:
         return None, None
 
 
 @projectcheck
-def RunCommand(is_interactive):
-    plan, project = RequestNewPlan()
+def run_command(is_interactive):
+    plan, project = request_new_plan()
     if plan:
-        rhh.AddChildLayer(lname=plan['floor'].zfill(
+        rhh.add_child_layer(lname=plan['floor'].zfill(
             2) + '_floor', parent=rs.LayerChildren("OpenPlans")[project])
 
 
 
 if __name__ == "__main__":
-    RunCommand(True)
+    run_command(True)
