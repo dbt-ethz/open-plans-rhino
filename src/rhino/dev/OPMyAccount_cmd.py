@@ -11,8 +11,8 @@ import Eto.Drawing as drawing
 import Eto.Forms as forms
 
 
-from api.auth import Login, checkLoginStatus, Logout
-from datamodels.User import User
+import api
+import datamodels as models
 
 __commandname__ = "OPMyAccount"
 
@@ -101,15 +101,15 @@ class AccountInfo(forms.Dialog[bool]):
         else:
             self.Close(True)
 
-
     # signout
+
     def OnSignOutButtonClick(self, sender, e):
-        Logout()
+        api.Logout()
         self.Close(True)
 
     @staticmethod
     def getLoginStatus():
-        return checkLoginStatus()['is_logged']
+        return api.checkLoginStatus()['is_logged']
 
 
 # The script that will be using the dialog.
@@ -123,8 +123,9 @@ def RequestAccount():
 def RunCommand(is_interactive):
     credentials = RequestAccount()
     if credentials:
-        user = User(email=credentials['email'])
+        user = models.User(email=credentials['email'])
         user.userLogin(password=credentials['password'])
+
 
 if __name__ == "__main__":
     RunCommand(True)

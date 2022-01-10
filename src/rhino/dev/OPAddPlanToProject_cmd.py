@@ -10,7 +10,7 @@ import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
 
-from rhino_helpers import AddChildLayer
+import rhino_helpers as rhh
 from decorators import projectcheck
 
 
@@ -96,7 +96,7 @@ def RequestNewPlan():
 def RunCommand(is_interactive):
     plan, project = RequestNewPlan()
     if plan:
-        AddChildLayer(lname=plan['floor'].zfill(
+        rhh.AddChildLayer(lname=plan['floor'].zfill(
             2) + '_floor', parent=rs.LayerChildren("OpenPlans")[project])
 
 

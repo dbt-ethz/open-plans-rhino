@@ -10,7 +10,7 @@ import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
 
-from rhino_helpers import AddChildLayer
+import rhino_helpers as rhh
 from decorators import projectcheck
 
 
@@ -125,7 +125,7 @@ def RunCommand(is_interactive):
         # if no tag exists and object is in correct layer, tag can be assigned
         tag = RequestPolygonTag(polygonLayer=obj_layer)
         if tag:
-            layer = AddChildLayer(tag, parent=obj_layer)
+            layer = rhh.AddChildLayer(tag, parent=obj_layer)
             AddPolygon2Layer(obj, layer)
     else:
         print(e)

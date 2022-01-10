@@ -10,9 +10,9 @@ import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
 
-from rhino_helpers import AddChildLayer, AddParentLayer, ProjectToRhinoLayers
-from datamodels.ProjectClass import ProjectData
-from api.project import fetchProject
+import rhino_helpers as rhh
+import datamodels as models
+import api
 
 __commandname__ = "OPCreateProject"
 
@@ -114,7 +114,7 @@ def RequestNewProject():
 
 
 def createNewProject(newproj):
-    project = ProjectData()
+    project = models.ProjectData()
     # modify empty project template with new project data
     project.modify_project(newproj)
     # upload project to OP database
@@ -122,9 +122,9 @@ def createNewProject(newproj):
     project_id = 557
     # retrieve project from open plans database
     if project_id:
-        resp = fetchProject(project_id=project_id)
+        resp = api.fetchProject(project_id=project_id)
         if resp['succeeded']:
-            return ProjectData(project=resp['project'], plans=resp['project']['plans'])
+            return models.ProjectData(project=resp['project'], plans=resp['project']['plans'])
         else:
             print(resp['error'])
 
@@ -135,7 +135,7 @@ def RunCommand(is_interactive):
     if newProject:
         openplansproject = createNewProject(newProject)
         # add project to rhino layers
-        ProjectToRhinoLayers(openplansproject.project)
+        rhh.ProjectToRhinoLayers(openplansproject.project)
 
 
 if __name__ == "__main__":
