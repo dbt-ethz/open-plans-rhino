@@ -10,7 +10,6 @@ import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
 
-
 import api
 import datamodels as models
 
