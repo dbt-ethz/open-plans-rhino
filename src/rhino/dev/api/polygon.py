@@ -1,11 +1,11 @@
 import urllib2
 from urllib2 import HTTPError
 import json
-from uri import URI
+import uri
 
 
 def fetch_polygon_types():
-    url = URI + '/polygon_type/all'
+    url = uri.URI + '/polygon_type/all'
     req = urllib2.Request(url)
 
     try:

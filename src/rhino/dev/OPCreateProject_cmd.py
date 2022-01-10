@@ -113,12 +113,12 @@ def request_new_project():
         return dialog.get_text()
 
 
-def create_new_project(newproj):
-    project = models.ProjectData()
+def create_new_project(project):
+    empty_project = models.ProjectData()
     # modify empty project template with new project data
-    project.modify_project(newproj)
+    new = empty_project.modify_project(project)
     # upload project to OP database
-    #project_id = project.saveProjectToOpenPlans()
+    #project_id = new.save_project_to_openplans()
     project_id = 557
     # retrieve project from open plans database
     if project_id:

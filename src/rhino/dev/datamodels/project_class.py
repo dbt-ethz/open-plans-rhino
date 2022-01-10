@@ -39,6 +39,7 @@ class ProjectData:
             self.__project[key] = dict[key]
         for key in kwargs:
             self.__project[key] = kwargs[key]
+        return self
 
     def save_project_to_openplans(self):
         resp = api.save_project(self.project)
@@ -50,4 +51,3 @@ class ProjectData:
 
     def __repr__(self):
         return "{}(project={})".format(self.__class__.__name__, self.project)
-

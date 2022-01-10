@@ -6,6 +6,7 @@ import rhinoscriptsyntax as rs
 
 
 def projectcheck(func):
+
     def wrapper(*args):
         # check if project exists
         if rs.IsLayer("OpenPlans"):

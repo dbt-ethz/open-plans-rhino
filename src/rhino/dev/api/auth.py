@@ -1,11 +1,11 @@
 import urllib2
 from urllib2 import HTTPError
 import json
-from uri import URI
+import uri
 
 
 def login(email, password):
-    url = URI + '/auth/login'
+    url = uri.URI + '/auth/login'
     data = json.dumps({'email': email,
                        'password': password})
     req = urllib2.Request(url, data=data, headers={
@@ -21,7 +21,7 @@ def login(email, password):
 
 
 def check_login_status():
-    url = URI + 'auth/status'
+    url = uri.URI + 'auth/status'
     req = urllib2.Request(url)
     try:
         response = urllib2.urlopen(req)
@@ -33,7 +33,7 @@ def check_login_status():
 
 
 def logout():
-    url = URI + 'auth/logout'
+    url = uri.URI + 'auth/logout'
     req = urllib2.Request(url)
     try:
         response = urllib2.urlopen(req)
