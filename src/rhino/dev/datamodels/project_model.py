@@ -1,4 +1,4 @@
-PROJECT = {
+project_fields = {
     "project_id": "",
     "name": "",
     "description": "",

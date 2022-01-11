@@ -26,8 +26,26 @@ def add_child_layer(lname, parent):
         return layer
 
 
-def project_to_rhino_layers(project):
-    parent = add_parent_layer('OpenPlans')
-    layername = "ID: {}; Name: {}".format(
-        project['id'], project['name'])
-    layer = add_child_layer(lname=layername, parent=parent)
+def project_to_rhino_layers(project_cls):
+    init = add_parent_layer('OpenPlans')
+    project_layer = add_child_layer(
+        lname=project_cls.project_id_string(), parent=init)
+    for id in project_cls.plan_ids:
+        pass
+
+
+def op_project_exists(func):
+
+    def wrapper(*args):
+        # check if project exists
+        if rs.IsLayer("OpenPlans"):
+            projects = rs.LayerChildren("OpenPlans")
+            print(projects)
+            if projects:
+                func()
+            else:
+                print("Error: Please create a project first (use OPCreateProject cmd)")
+        else:
+            print("Error: Please create a project first (use OPCreateProject cmd)")
+
+    return wrapper

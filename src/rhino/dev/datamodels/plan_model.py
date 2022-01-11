@@ -1,4 +1,4 @@
-PLAN = {
+plan_fields = {
     "plan_id": None,
     "image_path": "",
     "mms_per_pixel": None,

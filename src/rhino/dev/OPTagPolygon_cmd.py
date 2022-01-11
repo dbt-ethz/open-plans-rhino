@@ -10,8 +10,8 @@ import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
 
-import rhino_helpers as rhh
-from decorators import projectcheck
+import rhino.rhino_helpers as rhh
+from rhino.rhino_helpers import op_project_exists
 
 
 __commandname__ = "OPTagPlanPolygon"
@@ -114,7 +114,7 @@ def check_object_layer(obj_layer):
         return False, "Polygon is not part of a Plan: Please assign your polygons to the correct layer"
 
 
-@projectcheck
+@op_project_exists
 def run_command(is_interactive):
     # get a polyline
     obj = request_polygon()

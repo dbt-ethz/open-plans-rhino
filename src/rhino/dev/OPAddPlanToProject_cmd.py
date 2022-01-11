@@ -10,8 +10,8 @@ import Rhino.UI
 import Eto.Drawing as drawing
 import Eto.Forms as forms
 
-import rhino_helpers as rhh
-from decorators import projectcheck
+import rhino.rhino_helpers as rhh
+from rhino.rhino_helpers import op_project_exists
 
 
 __commandname__ = "OPAddPlanToProject"
@@ -31,7 +31,8 @@ class AddPlan(forms.Dialog[bool]):
         # Create Dropdown List
         self.m_dropdown_projects = forms.DropDown()
         # set projects in layers as options in dropdown
-        self.m_dropdown_projects.DataStore = [project.split('::')[1] for project in rs.LayerChildren("OpenPlans")]
+        self.m_dropdown_projects.DataStore = [project.split(
+            '::')[1] for project in rs.LayerChildren("OpenPlans")]
         # set default value
         self.m_dropdown_projects.SelectedIndex = 0
 
@@ -92,13 +93,12 @@ def request_new_plan():
         return None, None
 
 
-@projectcheck
-def run_command(is_interactive):
+@op_project_exists
+def run_command():
     plan, project = request_new_plan()
     if plan:
         rhh.add_child_layer(lname=plan['floor'].zfill(
             2) + '_floor', parent=rs.LayerChildren("OpenPlans")[project])
-
 
 
 if __name__ == "__main__":
