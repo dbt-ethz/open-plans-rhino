@@ -2,6 +2,9 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 
+import rhino.geometry_objs as geom
+import api
+
 import rhinoscriptsyntax as rs
 
 
@@ -26,12 +29,24 @@ def add_child_layer(lname, parent):
         return layer
 
 
-def project_to_rhino_layers(project_cls):
+def project_id_string(project_dict):
+    return "ID: {}; Name: {}".format(project_dict['id'],
+                                     project_dict['name'])
+
+
+def project_to_rhino_layers(project):
     init = add_parent_layer('OpenPlans')
     project_layer = add_child_layer(
-        lname=project_cls.project_id_string(), parent=init)
-    for id in project_cls.plan_ids:
-        pass
+        lname=project_id_string(project), parent=init)
+    for p in project['plans']:
+        plan = api.get_data(dict=api.fetch_plan(plan_id=p['id']), key='plan')
+        floor_layer = add_child_layer(lname=str(plan['floor']).zfill(
+            2) + '_floor', parent=project_layer)
+
+        for d in plan['polygons']:
+            p = geom.Polygon(data=d)
+            polygon_layer = add_child_layer(lname=p.tags[0], parent=floor_layer)
+            rs.ObjectLayer(rs.AddPolyline(p.points), layer=polygon_layer)
 
 
 def op_project_exists(func):
@@ -40,7 +55,6 @@ def op_project_exists(func):
         # check if project exists
         if rs.IsLayer("OpenPlans"):
             projects = rs.LayerChildren("OpenPlans")
-            print(projects)
             if projects:
                 func()
             else:

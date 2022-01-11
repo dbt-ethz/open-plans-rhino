@@ -114,19 +114,13 @@ def request_new_project():
 
 
 def create_new_project(project):
-    empty_project = models.ProjectData()
-    # modify empty project template with new project data
-    new = empty_project.modify_project(field_changes=project)
-    # upload project to OP database
-    #project_id = new.save_project_to_openplans()
-    project_id = 557
-    # retrieve project from open plans database
+    project_id = api.get_data(dict=api.save_project(
+        project=project), key='project_id')
+    project_id = 557    # hardcoded for testing
     if project_id:
-        resp = api.fetch_project(project_id=project_id)
-        if resp['succeeded']:
-            return models.ProjectData(project=resp['project'])
-        else:
-            print(resp['error'])
+        project = api.get_data(dict=api.fetch_project(
+            project_id=project_id), key='project')
+        return project
 
 
 def run_command(is_interactive):

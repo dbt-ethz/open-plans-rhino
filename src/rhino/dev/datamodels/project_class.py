@@ -7,15 +7,13 @@ from datamodels.project_model import project_fields
 from datamodels.polygon_model import polygon_fields
 import api
 
-import json
 
-
-class ProjectData:
+class OpenPlansProject:
 
     _PROJECT_MODEL = project_fields
 
     def __init__(self, project=None):
-        self.__project = project if project else ProjectData._PROJECT_MODEL
+        self.__project = project if project else OpenPlansProject._PROJECT_MODEL
         self.__plans = [self.PlanData(plan=p) for p in self.__project['plans']]
 
     @property
@@ -61,13 +59,6 @@ class ProjectData:
     def __repr__(self):
         return "{}(project={})".format(self.__class__.__name__, self.project)
 
-    def save_project_to_openplans(self):
-        resp = api.save_project(self.project)
-        if resp['succeeded']:
-            project_id = resp['project_id']
-            return project_id
-        else:
-            print(resp['error'])
 
     class PlanData:
 
