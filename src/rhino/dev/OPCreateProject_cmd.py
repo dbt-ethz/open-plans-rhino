@@ -115,12 +115,10 @@ def request_new_project():
 
 def create_new_project(project):
     project_id = api.get_data(dict=api.save_project(
-        project=project), key='project_id')
+        project=models.OpenPlansProject.from_custom(data=project).project), key='project_id')
     project_id = 557    # hardcoded for testing
     if project_id:
-        project = api.get_data(dict=api.fetch_project(
-            project_id=project_id), key='project')
-        return project
+        return models.OpenPlansProject.from_project_id(project_id)
 
 
 def run_command(is_interactive):

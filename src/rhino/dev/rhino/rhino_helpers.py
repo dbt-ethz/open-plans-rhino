@@ -2,8 +2,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 
-import rhino.geometry_objs as geom
-import api
+import rhino.geometry as geom
 
 import rhinoscriptsyntax as rs
 
@@ -29,24 +28,37 @@ def add_child_layer(lname, parent):
         return layer
 
 
-def project_id_string(project_dict):
-    return "ID: {}; Name: {}".format(project_dict['id'],
-                                     project_dict['name'])
+def plan_id_string(plan_dict):
+    return "{} Level; ID: {}".format(str(plan_dict['floor']).zfill(2), plan_dict['id'])
 
 
 def project_to_rhino_layers(project):
-    init = add_parent_layer('OpenPlans')
     project_layer = add_child_layer(
-        lname=project_id_string(project), parent=init)
-    for p in project['plans']:
-        plan = api.get_data(dict=api.fetch_plan(plan_id=p['id']), key='plan')
-        floor_layer = add_child_layer(lname=str(plan['floor']).zfill(
-            2) + '_floor', parent=project_layer)
+        lname=project.project_id_string, parent=add_parent_layer('OpenPlans'))
 
-        for d in plan['polygons']:
-            p = geom.Polygon(data=d)
-            polygon_layer = add_child_layer(lname=p.tags[0], parent=floor_layer)
-            rs.ObjectLayer(rs.AddPolyline(p.points), layer=polygon_layer)
+    plans = project.fetch_project_plans()
+    for plan in plans:
+        plan_layer = plan_to_rhino_layer(
+            plan, project_layer=project_layer)
+
+        # polygons = [geom.Polygon.from_data(data=data) for data in plan['polygons']]
+        # for p in polygons:
+        #     polygon_to_rhino_layer(p)
+
+        # for item_p in item_f['polygons']:
+        #     polygon = geom.Polygon.from_data(data=item_p)
+        # p = geom.Polygon.from_data(data=d)
+        # polygon_layer = add_child_layer(lname=p.tags[0], parent=floor_layer)
+        # rs.ObjectLayer(rs.AddPolyline(p.points), layer=polygon_layer)
+
+
+def plan_to_rhino_layer(plan, project_layer):
+    return add_child_layer(lname=plan.plan_id_string, parent=project_layer)
+
+
+def polygon_to_rhino_layer(polygon):
+    pass
+    #rs.ObjectLayer(object_id=rs.AddPolyline(polygon.points), layer='test')
 
 
 def op_project_exists(func):
