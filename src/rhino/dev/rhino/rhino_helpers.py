@@ -28,10 +28,6 @@ def add_child_layer(lname, parent):
         return layer
 
 
-def plan_id_string(plan_dict):
-    return "{} Level; ID: {}".format(str(plan_dict['floor']).zfill(2), plan_dict['id'])
-
-
 def project_to_rhino_layers(project):
     project_layer = add_child_layer(
         lname=project.project_id_string, parent=add_parent_layer('OpenPlans'))
@@ -41,15 +37,9 @@ def project_to_rhino_layers(project):
         plan_layer = plan_to_rhino_layer(
             plan, project_layer=project_layer)
 
-        # polygons = [geom.Polygon.from_data(data=data) for data in plan['polygons']]
-        # for p in polygons:
-        #     polygon_to_rhino_layer(p)
-
-        # for item_p in item_f['polygons']:
-        #     polygon = geom.Polygon.from_data(data=item_p)
-        # p = geom.Polygon.from_data(data=d)
-        # polygon_layer = add_child_layer(lname=p.tags[0], parent=floor_layer)
-        # rs.ObjectLayer(rs.AddPolyline(p.points), layer=polygon_layer)
+        # add polygons
+        polygons_layers = [polygon_to_rhino_layer(polygon=polygon)
+                           for polygon in plan.plan_polygons()]
 
 
 def plan_to_rhino_layer(plan, project_layer):
@@ -57,8 +47,10 @@ def plan_to_rhino_layer(plan, project_layer):
 
 
 def polygon_to_rhino_layer(polygon):
-    pass
-    #rs.ObjectLayer(object_id=rs.AddPolyline(polygon.points), layer='test')
+    geom = polygon.rhino_polygon()
+    polygon_layer = add_child_layer(lname=' '.join(
+        map(str, polygon.tags)), parent="00 Level; ID: 963")
+    rs.ObjectLayer(object_id=rs.AddPolyline(geom.points), layer=polygon_layer)
 
 
 def op_project_exists(func):

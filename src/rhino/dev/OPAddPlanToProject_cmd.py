@@ -11,7 +11,6 @@ import Eto.Drawing as drawing
 import Eto.Forms as forms
 
 import rhino.rhino_helpers as rhh
-from rhino.rhino_helpers import op_project_exists
 
 
 __commandname__ = "OPAddPlanToProject"
@@ -93,7 +92,7 @@ def request_new_plan():
         return None, None
 
 
-@op_project_exists
+@rhh.op_project_exists
 def run_command():
     plan, project = request_new_plan()
     if plan:

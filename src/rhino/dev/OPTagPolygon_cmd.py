@@ -11,7 +11,6 @@ import Eto.Drawing as drawing
 import Eto.Forms as forms
 
 import rhino.rhino_helpers as rhh
-from rhino.rhino_helpers import op_project_exists
 
 
 __commandname__ = "OPTagPlanPolygon"
@@ -114,13 +113,14 @@ def check_object_layer(obj_layer):
         return False, "Polygon is not part of a Plan: Please assign your polygons to the correct layer"
 
 
-@op_project_exists
-def run_command(is_interactive):
+@rhh.op_project_exists
+def run_command():
     # get a polyline
     obj = request_polygon()
     obj_layer = rs.ObjectLayer(obj)
     # check if object is in correct layer depth
-    proceed, e = check_object_layer(obj_layer)
+    #proceed, e = check_object_layer(obj_layer)
+    proceed = True
     if proceed is True:
         # if no tag exists and object is in correct layer, tag can be assigned
         tag = request_polygon_tag(layer=obj_layer)

@@ -74,7 +74,7 @@ class OpenPlansProject:
         return self
 
     def fetch_project_plans(self):
-        return [OpenPlansPlan.from_plan_id(id=id) for id in self.plan_ids ]
+        return [OpenPlansPlan.from_plan_id(id=id) for id in self.plan_ids]
 
     @property
     def project_id_string(self):
@@ -110,7 +110,7 @@ class OpenPlansPlan:
 
     @classmethod
     def from_custom(cls, data={}, **kwargs):
-        plan_fields = OpenPlansPlan._PROJECT_PLAN.copy()
+        plan_fields = OpenPlansPlan._PLAN_MODEL.copy()
         for key in data:
             plan_fields[key] = data[key]
         for key in kwargs:
@@ -122,13 +122,90 @@ class OpenPlansPlan:
         return cls.from_data(data=api.get_data(dict=api.fetch_plan(plan_id=id), key='plan'))
 
     @property
+    def plan(self):
+        return self.__plan
+
+    @property
     def plan_id(self):
-        return self.__plan['id']
+        return self.plan['id']
 
     @property
     def floor(self):
-        return self.__plan['floor']
+        return self.plan['floor']
 
     @property
     def plan_id_string(self):
         return "{} Level; ID: {}".format(str(self.floor).zfill(2), self.plan_id)
+
+    def plan_polygons(self):
+        return [OpenPlansPolygon.from_data(data=poly, floor=self.floor)
+                for poly in self.plan['polygons']]
+
+
+class OpenPlansPolygon:
+
+    _POLYGON_MODEL = polygon_fields
+
+    def __init__(self, data_fields=_POLYGON_MODEL, floor=None):
+        self.__polygon = data_fields
+        self.__floor = floor
+
+    @classmethod
+    def from_data(cls, data, floor=None):
+        """Construct a Open Plans polygon from its api data representation.
+
+        Parameters
+        ----------
+        data : dict
+            The data dictionary.
+
+        Returns
+        -------
+        :class:`OpenPlansPolygon`
+            The constructed dataclass.
+        """
+        return cls(data_fields={k: v for k, v in data.iteritems() if k in OpenPlansPolygon._POLYGON_MODEL}, floor=floor)
+
+    @classmethod
+    def from_custom(cls, data={}, **kwargs):
+        polygon_fields = OpenPlansPolygon._POLYGON_MODEL.copy()
+        for key in data:
+            polygon_fields[key] = data[key]
+        for key in kwargs:
+            polygon_fields[key] = kwargs[key]
+        return cls(data_fields=polygon_fields)
+
+    @classmethod
+    def from_polygon_id(cls, id):
+        pass
+
+    @property
+    def polygon(self):
+        return self.__polygon
+
+    @property
+    def polygon_id(self):
+        return self.polygon['id']
+
+    @property
+    def plan_id(self):
+        return self.polygon['plan_id']
+
+    @property
+    def tags(self):
+        return self.polygon['tags']
+
+    @property
+    def points(self):
+        return self.polygon['points']
+
+    @property
+    def polygon_id_string(self):
+        return "tags: {}; ID: {}".format(self.tags, self.polygon_id)
+
+    @property
+    def floor(self):
+        return self.__floor
+
+    def rhino_polygon(self):
+        return rhino.geometry.Polygon.from_data(data=self.points)
