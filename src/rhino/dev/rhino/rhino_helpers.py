@@ -5,52 +5,145 @@ from __future__ import division
 import rhino.geometry as geom
 
 import rhinoscriptsyntax as rs
+import Rhino
 
 
-def add_parent_layer(lname):
-    if rs.IsLayer(lname):
-        return lname
-    else:
-        parent = rs.AddLayer(name=lname, color=None,
-                             visible=True, locked=False, parent=None)
-        rs.CurrentLayer(parent)
-        return parent
+def add_parent_layer(lname, attr=None):
+    if not rs.IsLayer(lname):
+        lname = rs.AddLayer(name=lname, color=None,
+                            visible=True, locked=False, parent=None)
+        rs.CurrentLayer(lname)
+
+    if attr:
+        set_layer_user_text(layer=lname, data=attr)
+
+    return lname
 
 
-def add_child_layer(lname, parent):
+def add_child_layer(lname, parent, attr=None):
     # Add layer for new project
-    if rs.IsLayer(lname) and rs.IsLayerParentOf(lname, parent):
-        return lname
-    else:
-        layer = rs.AddLayer(name=lname, color=None,
+    if not (rs.IsLayer(lname) and rs.IsLayerParentOf(lname, parent)):
+        lname = rs.AddLayer(name=lname, color=None,
                             visible=True, locked=False, parent=parent)
-        rs.ParentLayer(layer=layer, parent=parent)
-        return layer
+        rs.ParentLayer(layer=lname, parent=parent)
+
+    ids = rs.LayerIds()
+    if attr:
+        set_layer_user_text(layer=ids[1], data=attr)
+
+    return lname
 
 
 def project_to_rhino_layers(project):
+    """Add Project instance to Rhino document layers.
+
+    Parameters
+    ----------
+    project : :class: 'OpenPlansProject'
+        open plans project instance.
+
+    Returns
+    -------
+
+    """
     project_layer = add_child_layer(
-        lname=project.project_id_string, parent=add_parent_layer('OpenPlans'))
+        lname=project.project_id_string, parent=add_parent_layer('OpenPlans'), attr=project.attributes)
 
     plans = project.fetch_project_plans()
     for plan in plans:
-        plan_layer = plan_to_rhino_layer(
-            plan, project_layer=project_layer)
+        plan_layer = add_child_layer(
+            lname=plan.plan_id_string, parent=project_layer)
 
         # add polygons
-        polygons_layers = [polygon_to_rhino_layer(polygon=polygon)
-                           for polygon in plan.plan_polygons()]
+        polygon_layers = add_polygon_rhino_layers(plan)
 
 
-def plan_to_rhino_layer(plan, project_layer):
-    return add_child_layer(lname=plan.plan_id_string, parent=project_layer)
+def add_polygon_rhino_layers(plan):
+    """Add Rhino Layers and Rhino.Polylines 
+    from Plan instance Polygons.
+
+    Parameters
+    ----------
+    plan : :class: 'OpenPlansPlan'
+        open plans plan instance.
+
+    Returns
+    -------
+    polygon_layers : list[str]
+        list of layer names from polygon layers
+    """
+    p_layers = []
+    for polygon in plan.plan_polygons():
+        layer = add_child_layer(lname=' '.join(
+            map(str, polygon.tags)), parent=rs.LayerName(plan.plan_id_string, fullpath=True))
+        p_layers.append(layer)
+        # add geometry to layer
+        polyline_to_rhino_layer(
+            geom=polygon.rhino_polygon(), layer=layer, attr=polygon.attributes)
+
+    return p_layers
 
 
-def polygon_to_rhino_layer(polygon):
-    geom = polygon.rhino_polygon()
-    polygon_layer = add_child_layer(lname=' '.join(
-        map(str, polygon.tags)), parent="00 Level; ID: 963")
-    rs.ObjectLayer(object_id=rs.AddPolyline(geom.points), layer=polygon_layer)
+def polyline_to_rhino_layer(geom, layer, attr=None):
+    """Add Polygon instance to Rhino document layer.
+
+    Parameters
+    ----------
+    geom : :class: 'Polygon'
+        Polygon instance.
+    layer : str
+        Rhino.Layer name
+    attr : dict
+        if dict, key value pairs of object's attributes
+        are stored in Rhino Object User text
+
+    Returns
+    -------
+
+    """
+    obj = rs.AddPolyline(geom.points)
+    rs.ObjectLayer(object_id=obj, layer=layer)
+
+    if attr:
+        set_object_user_text(object_id=obj, data=attr)
+
+
+def set_document_user_text(data):
+    """Set Rhino document user text.
+
+    Parameters
+    ----------
+    data : dict
+        data key value pairs.
+
+    Returns
+    -------
+
+    """
+    for key, value in data.iteritems():
+        rs.SetDocumentUserText(key=key, value=str(value))
+
+
+def set_object_user_text(object_id, data):
+    """Set Rhino Object user text.
+
+    Parameters
+    ----------
+    object_id : str
+        The Rhino object's identifier to which user data is assigned
+    data : dict
+        data key value pairs.
+
+    Returns
+    -------
+
+    """
+    for key, value in data.iteritems():
+        rs.SetUserText(object_id=object_id, key=key, value=str(value))
+
+
+def set_layer_user_text(layer, data):
+    pass
 
 
 def op_project_exists(func):

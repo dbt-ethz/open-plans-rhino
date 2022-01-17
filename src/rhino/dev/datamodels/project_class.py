@@ -34,10 +34,11 @@ class OpenPlansProject:
         return cls(data_fields={k: v for k, v in data.iteritems() if k in OpenPlansProject._PROJECT_MODEL})
 
     @classmethod
-    def from_custom(cls, data={}, **kwargs):
+    def from_custom(cls, data=None, **kwargs):
         project_fields = OpenPlansProject._PROJECT_MODEL.copy()
-        for key in data:
-            project_fields[key] = data[key]
+        if data:
+            for key in data:
+                project_fields[key] = data[key]
         for key in kwargs:
             project_fields[key] = kwargs[key]
         return cls(data_fields=project_fields)
@@ -65,6 +66,10 @@ class OpenPlansProject:
     @property
     def plan_ids(self):
         return [p['id'] for p in self.plans if p['id']]
+
+    @property
+    def attributes(self):
+        return {k: v for k, v in self.project.iteritems() if k not in ['plans']}
 
     def modify_project(self, field_changes={}, **kwargs):
         for key in field_changes:
@@ -109,10 +114,11 @@ class OpenPlansPlan:
         return cls(data_fields={k: v for k, v in data.iteritems() if k in OpenPlansPlan._PLAN_MODEL})
 
     @classmethod
-    def from_custom(cls, data={}, **kwargs):
+    def from_custom(cls, data=None, **kwargs):
         plan_fields = OpenPlansPlan._PLAN_MODEL.copy()
-        for key in data:
-            plan_fields[key] = data[key]
+        if data:
+            for key in data:
+                plan_fields[key] = data[key]
         for key in kwargs:
             plan_fields[key] = kwargs[key]
         return cls(data_fields=plan_fields)
@@ -167,10 +173,11 @@ class OpenPlansPolygon:
         return cls(data_fields={k: v for k, v in data.iteritems() if k in OpenPlansPolygon._POLYGON_MODEL}, floor=floor)
 
     @classmethod
-    def from_custom(cls, data={}, **kwargs):
+    def from_custom(cls, data=None, **kwargs):
         polygon_fields = OpenPlansPolygon._POLYGON_MODEL.copy()
-        for key in data:
-            polygon_fields[key] = data[key]
+        if data:
+            for key in data:
+                polygon_fields[key] = data[key]
         for key in kwargs:
             polygon_fields[key] = kwargs[key]
         return cls(data_fields=polygon_fields)
@@ -206,6 +213,10 @@ class OpenPlansPolygon:
     @property
     def floor(self):
         return self.__floor
+
+    @property
+    def attributes(self):
+        return {k: v for k, v in self.polygon.iteritems() if k not in ['points']}
 
     def rhino_polygon(self):
         return rhino.geometry.Polygon.from_data(data=self.points)
