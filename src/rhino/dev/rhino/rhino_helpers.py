@@ -48,7 +48,7 @@ def project_to_rhino_layers(project):
 
     """
     # Set document user text from project
-    set_document_user_text(data=project.attributes)
+    set_document_user_text(data=project.project)
 
     # project layer
     project_layer = add_child_layer(
@@ -128,12 +128,15 @@ def set_document_user_text(data):
     """
     for key, value in data.iteritems():
         if value:
-            rs.SetDocumentUserText(key=key, value=str(value))
+            rs.SetDocumentUserText(key=key, value=", ".join(map(str, value))) if type(
+                value) is list else rs.SetDocumentUserText(key=key, value=str(value))
         else:
             rs.SetDocumentUserText(key=key, value=' ')
 
 
 def get_document_user_text():
+    """Returns Rhino document user text as python dictionary"""
+    # remove empty spaces with split() to check for empty strings
     return {k: (rs.GetDocumentUserText(key=k) if rs.GetDocumentUserText(key=k).split() else None) for k in rs.GetDocumentUserText()}
 
 

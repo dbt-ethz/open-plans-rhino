@@ -41,10 +41,10 @@ class OpenPlansProject:
                     project_fields[key] = data[key].split(',')
                 elif data[key]:
                     project_fields[key] = data[key]
-        
+
         for key in kwargs:
             project_fields[key] = kwargs[key]
-        
+
         return cls(data_fields=project_fields)
 
     @classmethod
@@ -76,8 +76,29 @@ class OpenPlansProject:
         return {k: v for k, v in self.project.iteritems() if k not in ['plans']}
 
     def add_plan(self, plan):
-        self.__project['plans'].append(plan)
+        if isinstance(plan, OpenPlansPlan):
+            self.__project['plans'].append(plan.plan)
+        elif type(plan) is dict:
+            self.__project['plans'].append(plan)
         return self
+
+    def get_plan_objs(self, plan_ids=None):
+        """Constructs OpenPlansPlan object instances from plan data.
+
+        Parameters
+        ----------
+        plan_ids : list
+            If ids of plans given, only selected plans will be returned.
+
+        Returns
+        -------
+        list[:class:`OpenPlansProject`]
+            List of the constructed class instances.
+        """
+        if plan_ids:
+            return [OpenPlansPlan.from_data(p) for p in self.plans if p['id'] in plan_ids]
+        else:
+            return [OpenPlansPlan.from_data(p) for p in self.plans]
 
     def modify_project(self, field_changes={}, **kwargs):
         for key in field_changes:
