@@ -99,7 +99,7 @@ class CreateProject(forms.Dialog[bool]):
     def get_text(self):
         return {
             'name': self.m_textbox_name.Text,
-            'architects': self.m_textbox_architect.Text,
+            'architects': self.m_textbox_architect.Text.split(','),
             'civil_engineer': self.m_textbox_ceng.Text,
             'client': self.m_textbox_client.Text,
             'year_of_completion': self.m_numeric_yoc.Text,

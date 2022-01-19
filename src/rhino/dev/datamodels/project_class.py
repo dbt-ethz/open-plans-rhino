@@ -37,9 +37,7 @@ class OpenPlansProject:
         project_fields = OpenPlansProject._PROJECT_MODEL.copy()
         if data:
             for key in data:
-                if key in ['architects', 'tags'] and data[key]:
-                    project_fields[key] = data[key].split(',')
-                elif data[key]:
+                if data[key]:
                     project_fields[key] = data[key]
 
         for key in kwargs:

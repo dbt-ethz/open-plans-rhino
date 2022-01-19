@@ -106,9 +106,8 @@ def run_command():
 
         # project instance from document user data
         project = datamodels.OpenPlansProject.from_custom(data=rhh.get_document_user_text())
-        print(project)
-        project.add_plan(plan)
-        rhh.project_to_rhino_layers(project)
+        # add plan and add to rhino
+        rhh.project_to_rhino_layers(project.add_plan(plan))
 
 
 if __name__ == "__main__":

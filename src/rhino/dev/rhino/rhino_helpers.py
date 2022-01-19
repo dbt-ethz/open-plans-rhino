@@ -127,17 +127,13 @@ def set_document_user_text(data):
 
     """
     for key, value in data.iteritems():
-        if value:
-            rs.SetDocumentUserText(key=key, value=", ".join(map(str, value))) if type(
-                value) is list else rs.SetDocumentUserText(key=key, value=str(value))
-        else:
-            rs.SetDocumentUserText(key=key, value=' ')
+        rs.SetDocumentUserText(key=key, value=json.dumps(value))
 
 
 def get_document_user_text():
     """Returns Rhino document user text as python dictionary"""
     # remove empty spaces with split() to check for empty strings
-    return {k: (rs.GetDocumentUserText(key=k) if rs.GetDocumentUserText(key=k).split() else None) for k in rs.GetDocumentUserText()}
+    return {k: json.loads(rs.GetDocumentUserText(key=k)) for k in rs.GetDocumentUserText()}
 
 
 def set_object_user_text(object_id, data):
