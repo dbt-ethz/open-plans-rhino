@@ -1,7 +1,6 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
-from api import plan
 
 from datamodels.plan_model import plan_fields
 from datamodels.project_model import project_fields
@@ -38,9 +37,14 @@ class OpenPlansProject:
         project_fields = OpenPlansProject._PROJECT_MODEL.copy()
         if data:
             for key in data:
-                project_fields[key] = data[key]
+                if key in ['architects', 'tags'] and data[key]:
+                    project_fields[key] = data[key].split(',')
+                elif data[key]:
+                    project_fields[key] = data[key]
+        
         for key in kwargs:
             project_fields[key] = kwargs[key]
+        
         return cls(data_fields=project_fields)
 
     @classmethod
@@ -70,6 +74,10 @@ class OpenPlansProject:
     @property
     def attributes(self):
         return {k: v for k, v in self.project.iteritems() if k not in ['plans']}
+
+    def add_plan(self, plan):
+        self.__project['plans'].append(plan)
+        return self
 
     def modify_project(self, field_changes={}, **kwargs):
         for key in field_changes:

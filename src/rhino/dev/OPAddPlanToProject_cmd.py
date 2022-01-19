@@ -11,6 +11,7 @@ import Eto.Drawing as drawing
 import Eto.Forms as forms
 
 import rhino.rhino_helpers as rhh
+import datamodels
 
 
 __commandname__ = "OPAddPlanToProject"
@@ -96,8 +97,16 @@ def request_new_plan():
 def run_command():
     plan, project = request_new_plan()
     if plan:
-        rhh.add_child_layer(lname=plan['floor'].zfill(
-            2) + '_floor', parent=rs.LayerChildren("OpenPlans")[project])
+        # plan instance from user input
+        plan = datamodels.OpenPlansPlan.from_custom(data=plan)
+
+        # plan layer
+        rhh.add_child_layer(lname=plan.plan_id_string,
+                            parent=rs.LayerChildren("OpenPlans")[project])
+
+        # project instance from document user data
+        project = datamodels.OpenPlansProject.from_custom(data=rhh.get_document_user_text())
+        
 
 
 if __name__ == "__main__":

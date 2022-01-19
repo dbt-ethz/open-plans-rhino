@@ -6,6 +6,7 @@ import rhino.geometry as geom
 
 import rhinoscriptsyntax as rs
 import Rhino
+import json
 
 
 def add_parent_layer(lname, attr=None):
@@ -46,15 +47,20 @@ def project_to_rhino_layers(project):
     -------
 
     """
-    project_layer = add_child_layer(
-        lname=project.project_id_string, parent=add_parent_layer('OpenPlans'), attr=project.attributes)
+    # Set document user text from project
+    set_document_user_text(data=project.attributes)
 
+    # project layer
+    project_layer = add_child_layer(
+        lname=project.project_id_string, parent=add_parent_layer('OpenPlans'))
+
+    # plan layers
     plans = project.fetch_project_plans()
     for plan in plans:
         plan_layer = add_child_layer(
             lname=plan.plan_id_string, parent=project_layer)
 
-        # add polygons
+    # polygon layers
         polygon_layers = add_polygon_rhino_layers(plan)
 
 
@@ -121,7 +127,14 @@ def set_document_user_text(data):
 
     """
     for key, value in data.iteritems():
-        rs.SetDocumentUserText(key=key, value=str(value))
+        if value:
+            rs.SetDocumentUserText(key=key, value=str(value))
+        else:
+            rs.SetDocumentUserText(key=key, value=' ')
+
+
+def get_document_user_text():
+    return {k: (rs.GetDocumentUserText(key=k) if rs.GetDocumentUserText(key=k).split() else None) for k in rs.GetDocumentUserText()}
 
 
 def set_object_user_text(object_id, data):

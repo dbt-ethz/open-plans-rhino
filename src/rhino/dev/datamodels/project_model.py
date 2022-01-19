@@ -1,5 +1,5 @@
 project_fields = {
-    "id": "",
+    "id": None,
     "name": "",
     "description": "",
     "civil_engineer": "",
