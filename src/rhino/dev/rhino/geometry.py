@@ -22,4 +22,3 @@ class Polygon:
 
     def to_data(self):
         return {"points": [{'x': p[0], 'y': p[1]} for p in self.points]}
-

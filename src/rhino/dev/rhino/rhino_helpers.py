@@ -151,11 +151,18 @@ def set_object_user_text(object_id, data):
 
     """
     for key, value in data.iteritems():
-        rs.SetUserText(object_id=object_id, key=key, value=str(value))
+        rs.SetUserText(object_id=object_id, key=key, value=json.dumps(value))
 
 
 def set_layer_user_text(layer, data):
     pass
+
+
+def rhino_curve_to_data_points(obj):
+    if rs.IsCurve(obj):
+        points = rs.CurvePoints(obj)
+    # TODO: Flip Y coordinates to match image coordinates
+    return [{'x': p.X, 'y': p.Y} for p in points]
 
 
 def op_project_exists(func):

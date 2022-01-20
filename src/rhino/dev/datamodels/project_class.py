@@ -171,7 +171,7 @@ class OpenPlansPlan:
         return "{} Level; ID: {}".format(str(self.floor).zfill(2), self.plan_id)
 
     def plan_polygons(self):
-        return [OpenPlansPolygon.from_data(data=poly, floor=self.floor)
+        return [OpenPlansPolygon.from_data(data=poly)
                 for poly in self.plan['polygons']]
 
 
@@ -179,12 +179,11 @@ class OpenPlansPolygon:
 
     _POLYGON_MODEL = polygon_fields
 
-    def __init__(self, data_fields=_POLYGON_MODEL, floor=None):
+    def __init__(self, data_fields=_POLYGON_MODEL):
         self.__polygon = data_fields
-        self.__floor = floor
 
     @classmethod
-    def from_data(cls, data, floor=None):
+    def from_data(cls, data):
         """Construct a Open Plans polygon from its api data representation.
 
         Parameters
@@ -197,14 +196,16 @@ class OpenPlansPolygon:
         :class:`OpenPlansPolygon`
             The constructed dataclass.
         """
-        return cls(data_fields={k: v for k, v in data.iteritems() if k in OpenPlansPolygon._POLYGON_MODEL}, floor=floor)
+        return cls(data_fields={k: v for k, v in data.iteritems() if k in OpenPlansPolygon._POLYGON_MODEL})
 
     @classmethod
     def from_custom(cls, data=None, **kwargs):
         polygon_fields = OpenPlansPolygon._POLYGON_MODEL.copy()
         if data:
             for key in data:
-                polygon_fields[key] = data[key]
+                if data[key]:
+                    polygon_fields[key] = data[key]
+
         for key in kwargs:
             polygon_fields[key] = kwargs[key]
         return cls(data_fields=polygon_fields)
@@ -236,10 +237,6 @@ class OpenPlansPolygon:
     @property
     def polygon_id_string(self):
         return "tags: {}; ID: {}".format(self.tags, self.polygon_id)
-
-    @property
-    def floor(self):
-        return self.__floor
 
     @property
     def attributes(self):

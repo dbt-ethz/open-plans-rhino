@@ -11,6 +11,7 @@ import Eto.Drawing as drawing
 import Eto.Forms as forms
 
 import rhino.rhino_helpers as rhh
+import datamodels
 
 
 __commandname__ = "OPTagPlanPolygon"
@@ -93,42 +94,22 @@ def request_polygon():
     return obj
 
 
-def add_polygon2layer(obj, layer):
-    rs.ObjectLayer(obj, layer=layer)
-
-
-def check_object_layer(obj_layer):
-    # check if object is in the right layer depth
-    if len(obj_layer.split('::')) == 3:
-        # check if layer is part of a plan/floor
-        if obj_layer.split('::')[-1].split('_')[1] == 'floor':
-            return True, "Correct"
-        else:
-            return False, "Layer structure is not correct: Please check your layer names"
-    # check if object already has a tag
-    elif len(obj_layer.split('::')) == 4:
-        return False, 'Polygon is already tagged'
-    # other cases
-    else:
-        return False, "Polygon is not part of a Plan: Please assign your polygons to the correct layer"
-
-
 @rhh.op_project_exists
 def run_command():
     # get a polyline
     obj = request_polygon()
     obj_layer = rs.ObjectLayer(obj)
-    # check if object is in correct layer depth
-    #proceed, e = check_object_layer(obj_layer)
-    proceed = True
-    if proceed is True:
-        # if no tag exists and object is in correct layer, tag can be assigned
-        tag = request_polygon_tag(layer=obj_layer)
-        if tag:
-            layer = rhh.add_child_layer(tag, parent=obj_layer)
-            add_polygon2layer(obj, layer)
-    else:
-        print(e)
+
+    # if no tag exists and object is in correct layer, tag can be assigned
+    tag = request_polygon_tag(layer=obj_layer)
+    if tag:
+        layer = rhh.add_child_layer(tag, parent=obj_layer)
+        rs.ObjectLayer(obj, layer=layer)
+        pts_data = rhh.rhino_curve_to_data_points(obj)
+        polygon = datamodels.OpenPlansPolygon.from_custom(
+            data={'points': pts_data, 'tags': [tag]})
+        
+        rhh.set_object_user_text(object_id=obj, data=polygon.polygon)
 
 
 if __name__ == "__main__":
