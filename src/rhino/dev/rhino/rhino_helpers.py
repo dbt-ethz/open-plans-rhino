@@ -159,6 +159,18 @@ def set_layer_user_text(layer, data):
 
 
 def rhino_curve_to_data_points(obj):
+    """Set Rhino document user text.
+
+    Parameters
+    ----------
+    obj : str
+        object_id (guid): the object's identifier.
+
+    Returns
+    -------
+    points data: dict
+        the points from polygon in dict format of open plans
+    """
     if rs.IsCurve(obj):
         points = rs.CurvePoints(obj)
     # TODO: Flip Y coordinates to match image coordinates
