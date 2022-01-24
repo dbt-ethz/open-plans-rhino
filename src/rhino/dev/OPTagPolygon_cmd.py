@@ -20,22 +20,28 @@ __commandname__ = "OPTagPlanPolygon"
 class PolygonTagSelection(forms.Dialog[bool]):
 
     # Dialog box Class initializer
-    def __init__(self, polygon_layer):
+    def __init__(self):
         # Initialize dialog box
         self.Title = 'OPEN PLANS: tag polygon'
         self.Padding = drawing.Padding(10)
         self.Resizable = False
-        self.CurrentLayer = polygon_layer
 
         # Current project
-        self.m_label_project = forms.Label(Text='Current Project:')
+        self.m_label_project = forms.Label(Text='Current Project')
+        self.active_project = datamodels.OpenPlansProject.from_custom(
+            data=rhh.get_document_user_text())
         self.m_textbox_project = forms.Label(
-            Text=self.CurrentLayer.split("::")[1])
+            Text=self.active_project.project_id_string)
 
-        # Current floor
-        self.m_label_floor = forms.Label(Text='Floor:')
-        self.m_textbox_floor = forms.Label(
-            Text=self.CurrentLayer.split("::")[2])
+        # Floor levels dropdown
+        self.m_label_floor = forms.Label(Text='Floor')
+        # Create Dropdown List
+        self.m_dropdown_floors = forms.DropDown()
+        # set floors in layers as options in dropdown
+        self.m_dropdown_floors.DataStore = [floor.split(
+            '::')[2] for floor in rs.LayerChildren(self.m_textbox_project.Text)]
+        # set default value
+        self.m_dropdown_floors.SelectedIndex = 0
 
         # Create Combobox
         self.m_label = forms.Label(Text='Tag:')
@@ -54,7 +60,7 @@ class PolygonTagSelection(forms.Dialog[bool]):
         layout = forms.DynamicLayout()
         layout.Spacing = drawing.Size(80, 20)
         layout.AddRow(self.m_label_project, self.m_textbox_project)
-        layout.AddRow(self.m_label_floor, self.m_textbox_floor)
+        layout.AddRow(self.m_label_floor, self.m_dropdown_floors)
         layout.AddRow(self.m_label, self.m_combobox)
         layout.AddRow(None)  # spacer
         layout.AddRow(self.DefaultButton, self.AbortButton)
@@ -64,7 +70,8 @@ class PolygonTagSelection(forms.Dialog[bool]):
 
     # Get the value of the textbox
     def get_text(self):
-        return self.m_combobox.Text
+        return {'tag': self.m_combobox.Text,
+                'floor': self.m_dropdown_floors.DataStore[self.m_dropdown_floors.SelectedIndex]}
 
     # Close button click handler
     def on_close_button_click(self, sender, e):
@@ -80,8 +87,8 @@ class PolygonTagSelection(forms.Dialog[bool]):
 
 
 # The script that will be using the dialog.
-def request_polygon_tag(layer):
-    dialog = PolygonTagSelection(polygon_layer=layer)
+def request_polygon_tag():
+    dialog = PolygonTagSelection()
     rc = dialog.ShowModal(Rhino.UI.RhinoEtoApp.MainWindow)
     if (rc):
         return dialog.get_text()
@@ -94,21 +101,20 @@ def request_polygon():
     return obj
 
 
-@rhh.op_project_exists
+@ rhh.op_project_exists
 def run_command():
     # get a polyline
     obj = request_polygon()
-    obj_layer = rs.ObjectLayer(obj)
 
     # if no tag exists and object is in correct layer, tag can be assigned
-    tag = request_polygon_tag(layer=obj_layer)
-    if tag:
-        layer = rhh.add_child_layer(tag, parent=obj_layer)
+    data = request_polygon_tag()
+    if data['tag']:
+        layer = rhh.add_child_layer(data['tag'], parent=data['floor'])
         rs.ObjectLayer(obj, layer=layer)
         pts_data = rhh.rhino_curve_to_data_points(obj)
         polygon = datamodels.OpenPlansPolygon.from_custom(
-            data={'points': pts_data, 'tags': [tag]})
-        
+            data={'points': pts_data, 'tags': [data['tag']]})
+
         rhh.set_object_user_text(object_id=obj, data=polygon.polygon)
 
 
