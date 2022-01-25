@@ -101,11 +101,12 @@ def run_command():
         plan = datamodels.OpenPlansPlan.from_custom(data=plan)
 
         # plan layer
-        rhh.add_child_layer(lname=plan.plan_id_string,
+        plan_layer = rhh.add_child_layer(lname=plan.plan_id_string,
                             parent=rs.LayerChildren("OpenPlans")[project])
-
+                            
         # project instance from document user data
-        project = datamodels.OpenPlansProject.from_custom(data=rhh.get_document_user_text())
+        project = datamodels.OpenPlansProject.from_custom(
+            data=rhh.get_document_user_text())
         # add plan and add to rhino
         rhh.project_to_rhino_layers(project.add_plan(plan))
 

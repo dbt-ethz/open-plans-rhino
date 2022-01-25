@@ -6,6 +6,7 @@ import rhino.geometry as geom
 
 import rhinoscriptsyntax as rs
 import Rhino
+import scriptcontext as sc
 import json
 
 
@@ -26,11 +27,14 @@ def add_child_layer(lname, parent, attr=None):
     if not (rs.IsLayer(lname) and rs.IsLayerParentOf(lname, parent)):
         lname = rs.AddLayer(name=lname, color=None,
                             visible=True, locked=False, parent=parent)
+        l_id = rs.LayerId(lname)
+        # move layer under parent layer
         rs.ParentLayer(layer=lname, parent=parent)
+        # fullpath layername
+        lname = rs.LayerName(layer_id=l_id, fullpath=True)
 
-    ids = rs.LayerIds()
     if attr:
-        set_layer_user_text(layer=ids[1], data=attr)
+        set_layer_user_text(lname=lname, data=attr)
 
     return lname
 
@@ -154,8 +158,26 @@ def set_object_user_text(object_id, data):
         rs.SetUserText(object_id=object_id, key=key, value=json.dumps(value))
 
 
-def set_layer_user_text(layer, data):
-    pass
+def set_layer_user_text(lname, data):
+    index = sc.doc.Layers.FindByFullPath(lname, -1)
+    if index >= 0:
+        layer = sc.doc.Layers[index]
+        if layer:
+            for key, value in data.iteritems():
+                layer.SetUserString(key, json.dumps(value))
+            layer.CommitChanges()
+    else:
+        print('Error set layer text: Layer not found')
+
+
+def get_layer_user_text(lname):
+    index = sc.doc.Layers.FindByFullPath(lname, -1)
+    if index >= 0:
+        layer = sc.doc.Layers[index]
+        if layer:
+            return {k: json.loads(layer.GetUserString(key=k)) for k in layer.GetUserStrings().AllKeys}
+    else:
+        print('Error get layer text: Layer not found')
 
 
 def rhino_curve_to_data_points(obj):
