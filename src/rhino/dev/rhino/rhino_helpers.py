@@ -2,7 +2,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 
-import rhino.geometry as geom
+import datamodels
 
 import rhinoscriptsyntax as rs
 import Rhino
@@ -66,6 +66,10 @@ def project_to_rhino_layers(project):
 
     # polygon layers
         polygon_layers = add_polygon_rhino_layers(plan)
+
+
+def rhino_layers_to_project():
+    pass
 
 
 def add_polygon_rhino_layers(plan):
@@ -156,6 +160,10 @@ def set_object_user_text(object_id, data):
     """
     for key, value in data.iteritems():
         rs.SetUserText(object_id=object_id, key=key, value=json.dumps(value))
+
+
+def get_object_user_text(object_id):
+    return {k: json.loads(rs.GetUserText(object_id=object_id, key=k)) for k in rs.GetUserText(object_id=object_id)}
 
 
 def set_layer_user_text(lname, data):

@@ -102,8 +102,11 @@ def run_command():
 
         # plan layer
         plan_layer = rhh.add_child_layer(lname=plan.plan_id_string,
-                            parent=rs.LayerChildren("OpenPlans")[project])
-                            
+                                         parent=rs.LayerChildren(
+                                             "OpenPlans")[project],
+                                         attr=plan.plan)
+
+        # TODO: Remove plan from document user text
         # project instance from document user data
         project = datamodels.OpenPlansProject.from_custom(
             data=rhh.get_document_user_text())
