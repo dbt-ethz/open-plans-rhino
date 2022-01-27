@@ -207,6 +207,12 @@ def rhino_curve_to_data_points(obj):
     return [{'x': p.X, 'y': p.Y} for p in points]
 
 
+def get_rhino_doc_layer_obj(fullpath_lname):
+    index = sc.doc.Layers.FindByFullPath(fullpath_lname, -1)
+    if index >= 0:
+        return sc.doc.Layers[index]
+
+
 def op_project_exists(func):
 
     def wrapper(*args):

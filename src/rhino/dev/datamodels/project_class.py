@@ -6,6 +6,7 @@ from datamodels.plan_model import plan_fields
 from datamodels.project_model import project_fields
 from datamodels.polygon_model import polygon_fields
 import rhino.geometry
+import rhino.rhino_helpers
 import api
 
 
@@ -174,6 +175,13 @@ class OpenPlansPlan:
         return [OpenPlansPolygon.from_data(data=poly)
                 for poly in self.plan['polygons']]
 
+    def add_polygon(self, polygon):
+        if isinstance(polygon, OpenPlansPolygon):
+            self.__plan['polygons'].append(polygon.polygon)
+        elif type(polygon) is dict:
+            self.__plan['polygons'].append(polygon)
+        return self
+
 
 class OpenPlansPolygon:
 
@@ -213,6 +221,12 @@ class OpenPlansPolygon:
     @classmethod
     def from_polygon_id(cls, id):
         pass
+
+    @classmethod
+    def from_rhino_object(cls, rhobj):
+        data = rhino.rhino_helpers.get_object_user_text(object_id=rhobj)
+        data['points'] = rhino.rhino_helpers.rhino_curve_to_data_points(rhobj)
+        return cls.from_custom(data=data)
 
     @property
     def polygon(self):
