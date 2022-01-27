@@ -71,7 +71,7 @@ class PolygonTagSelection(forms.Dialog[bool]):
     # Get the value of the textbox
     def get_text(self):
         return {'tag': self.m_combobox.Text,
-                'floor': self.m_dropdown_floors.DataStore[self.m_dropdown_floors.SelectedIndex]}
+                'floor': rs.LayerChildren(self.m_textbox_project.Text)[self.m_dropdown_floors.SelectedIndex]}
 
     # Close button click handler
     def on_close_button_click(self, sender, e):
@@ -107,15 +107,15 @@ def run_command():
     obj = request_polygon()
 
     # if no tag exists and object is in correct layer, tag can be assigned
-    data = request_polygon_tag()
-    if data['tag']:
-        layer = rhh.add_child_layer(data['tag'], parent=data['floor'])
-        rs.ObjectLayer(obj, layer=layer)
+    user_input = request_polygon_tag()
+    if user_input['tag']:
+        lname, lid = rhh.add_child_layer(user_input['tag'], parent=user_input['floor'])
+        rs.ObjectLayer(obj, layer=lname)
         pts_data = rhh.rhino_curve_to_data_points(obj)
         polygon = datamodels.OpenPlansPolygon.from_custom(
-            data={'points': pts_data, 'tags': [data['tag']]})
+            data={'points': pts_data, 'tags': [user_input['tag']]})
 
-        rhh.set_object_user_text(object_id=obj, data=polygon.polygon)
+        rhh.set_object_user_text(object_id=obj, data=polygon.attributes)
 
 
 if __name__ == "__main__":

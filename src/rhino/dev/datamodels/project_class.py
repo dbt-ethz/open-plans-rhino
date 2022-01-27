@@ -9,12 +9,14 @@ import rhino.geometry
 import rhino.rhino_helpers
 import api
 
+import copy
+
 
 class OpenPlansProject:
 
-    _PROJECT_MODEL = project_fields
+    #_PROJECT_MODEL = dict(project_fields)
 
-    def __init__(self, data_fields=_PROJECT_MODEL):
+    def __init__(self, data_fields=copy.deepcopy(project_fields)):
         self.__project = data_fields
 
     @classmethod
@@ -31,20 +33,20 @@ class OpenPlansProject:
         :class:`OpenPlansProject`
             The constructed dataclass.
         """
-        return cls(data_fields={k: v for k, v in data.iteritems() if k in OpenPlansProject._PROJECT_MODEL})
+        return cls(data_fields={k: v for k, v in data.iteritems() if k in project_fields})
 
     @classmethod
     def from_custom(cls, data=None, **kwargs):
-        project_fields = OpenPlansProject._PROJECT_MODEL.copy()
+        project_attr = copy.deepcopy(project_fields)
         if data:
             for key in data:
                 if data[key]:
-                    project_fields[key] = data[key]
+                    project_attr[key] = data[key]
 
         for key in kwargs:
-            project_fields[key] = kwargs[key]
+            project_attr[key] = kwargs[key]
 
-        return cls(data_fields=project_fields)
+        return cls(data_fields=project_attr)
 
     @classmethod
     def from_project_id(cls, id):
@@ -120,9 +122,7 @@ class OpenPlansProject:
 
 class OpenPlansPlan:
 
-    _PLAN_MODEL = plan_fields
-
-    def __init__(self, data_fields=_PLAN_MODEL):
+    def __init__(self, data_fields=copy.deepcopy(plan_fields)):
         self.__plan = data_fields
 
     @classmethod
@@ -139,17 +139,17 @@ class OpenPlansPlan:
         :class:`OpenPlansPlan`
             The constructed dataclass.
         """
-        return cls(data_fields={k: v for k, v in data.iteritems() if k in OpenPlansPlan._PLAN_MODEL})
+        return cls(data_fields={k: v for k, v in data.iteritems() if k in plan_fields})
 
     @classmethod
     def from_custom(cls, data=None, **kwargs):
-        plan_fields = OpenPlansPlan._PLAN_MODEL.copy()
+        plan_attr = copy.deepcopy(plan_fields)
         if data:
             for key in data:
-                plan_fields[key] = data[key]
+                plan_attr[key] = data[key]
         for key in kwargs:
-            plan_fields[key] = kwargs[key]
-        return cls(data_fields=plan_fields)
+            plan_attr[key] = kwargs[key]
+        return cls(data_fields=plan_attr)
 
     @classmethod
     def from_plan_id(cls, id):
@@ -168,8 +168,16 @@ class OpenPlansPlan:
         return self.plan['floor']
 
     @property
+    def polygons(self):
+        return self.plan['polygons']
+
+    @property
     def plan_id_string(self):
         return "{} Level; ID: {}".format(str(self.floor).zfill(2), self.plan_id)
+
+    @property
+    def attributes(self):
+        return {k: v for k, v in self.plan.iteritems() if k not in ['polygons']}
 
     def plan_polygons(self):
         return [OpenPlansPolygon.from_data(data=poly)
@@ -177,17 +185,17 @@ class OpenPlansPlan:
 
     def add_polygon(self, polygon):
         if isinstance(polygon, OpenPlansPolygon):
-            self.__plan['polygons'].append(polygon.polygon)
+            self.plan['polygons'].append(polygon.polygon)
         elif type(polygon) is dict:
-            self.__plan['polygons'].append(polygon)
+            self.plan['polygons'].append(polygon)
         return self
 
 
 class OpenPlansPolygon:
 
-    _POLYGON_MODEL = polygon_fields
+    #_POLYGON_MODEL = dict(polygon_fields)
 
-    def __init__(self, data_fields=_POLYGON_MODEL):
+    def __init__(self, data_fields=copy.deepcopy(polygon_fields)):
         self.__polygon = data_fields
 
     @classmethod
@@ -204,19 +212,19 @@ class OpenPlansPolygon:
         :class:`OpenPlansPolygon`
             The constructed dataclass.
         """
-        return cls(data_fields={k: v for k, v in data.iteritems() if k in OpenPlansPolygon._POLYGON_MODEL})
+        return cls(data_fields={k: v for k, v in data.iteritems() if k in polygon_fields})
 
     @classmethod
     def from_custom(cls, data=None, **kwargs):
-        polygon_fields = OpenPlansPolygon._POLYGON_MODEL.copy()
+        polygon_attr = copy.deepcopy(polygon_fields)
         if data:
             for key in data:
                 if data[key]:
-                    polygon_fields[key] = data[key]
+                    polygon_attr[key] = data[key]
 
         for key in kwargs:
-            polygon_fields[key] = kwargs[key]
-        return cls(data_fields=polygon_fields)
+            polygon_attr[key] = kwargs[key]
+        return cls(data_fields=polygon_attr)
 
     @classmethod
     def from_polygon_id(cls, id):

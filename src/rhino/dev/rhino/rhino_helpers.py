@@ -16,27 +16,33 @@ def add_parent_layer(lname, attr=None):
                             visible=True, locked=False, parent=None)
         rs.CurrentLayer(lname)
 
+    layer_id = rs.LayerId(lname)
+
     if attr:
         set_layer_user_text(layer=lname, data=attr)
 
-    return lname
+    return lname, layer_id
 
 
 def add_child_layer(lname, parent, attr=None):
-    # Add layer for new project
+    # Add layer if it does not exist yet
+    # TODO: add tag move polygon to correct layer
     if not (rs.IsLayer(lname) and rs.IsLayerParentOf(lname, parent)):
         lname = rs.AddLayer(name=lname, color=None,
                             visible=True, locked=False, parent=parent)
-        l_id = rs.LayerId(lname)
+        layer_id = rs.LayerId(lname)
         # move layer under parent layer
         rs.ParentLayer(layer=lname, parent=parent)
         # fullpath layername
-        lname = rs.LayerName(layer_id=l_id, fullpath=True)
+        lname = rs.LayerName(layer_id=layer_id, fullpath=True)
+    else:
+        layer_id = rs.LayerId("{}::{}".format(parent, lname))
+        lname = rs.LayerName(layer_id)
 
     if attr:
         set_layer_user_text(lname=lname, data=attr)
 
-    return lname
+    return lname, layer_id
 
 
 def project_to_rhino_layers(project):
@@ -52,24 +58,55 @@ def project_to_rhino_layers(project):
 
     """
     # Set document user text from project
-    set_document_user_text(data=project.project)
+    set_document_user_text(data=project.attributes)
 
     # project layer
-    project_layer = add_child_layer(
-        lname=project.project_id_string, parent=add_parent_layer('OpenPlans'))
+    project_lname, project_lid = add_child_layer(
+        lname=project.project_id_string, parent=add_parent_layer('OpenPlans')[0])
 
     # plan layers
     plans = project.fetch_project_plans()
     for plan in plans:
-        plan_layer = add_child_layer(
-            lname=plan.plan_id_string, parent=project_layer)
+        _plan_lname, _plan_lid = add_child_layer(
+            lname=plan.plan_id_string, parent=project_lname, attr=plan.attributes)
 
     # polygon layers
-        polygon_layers = add_polygon_rhino_layers(plan)
+        _polygon_layers = add_polygon_rhino_layers(plan)
 
 
 def rhino_layers_to_project():
-    pass
+    """Read rhino objects (geometry and layers) from 
+    rhino doc and construct 'OpenPlansProject' instance.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    project :class: 'OpenPlansProject'
+        Open Plans Project class instance
+    """
+    project = datamodels.OpenPlansProject.from_custom(
+        data=get_document_user_text())
+
+    project_layer = rs.LayerChildren("OpenPlans")[0]  # TODO: make more robust
+
+    for plan_layer in rs.LayerChildren(project_layer):
+        plan = datamodels.OpenPlansPlan.from_custom(
+            data=get_layer_user_text(lname=plan_layer))
+
+        for polygon_layer in rs.LayerChildren(plan_layer):
+            rh_objs = sc.doc.Objects.FindByLayer(
+                get_rhino_doc_layer_obj(polygon_layer))
+
+            for obj in rh_objs:
+                plan.add_polygon(
+                    datamodels.OpenPlansPolygon.from_rhino_object(rhobj=obj.Id))
+
+        project.add_plan(plan)
+
+    return project
 
 
 def add_polygon_rhino_layers(plan):
@@ -88,17 +125,17 @@ def add_polygon_rhino_layers(plan):
     """
     p_layers = []
     for polygon in plan.plan_polygons():
-        layer = add_child_layer(lname=' '.join(
+        lname, lid = add_child_layer(lname=' '.join(
             map(str, polygon.tags)), parent=rs.LayerName(plan.plan_id_string, fullpath=True))
-        p_layers.append(layer)
+        p_layers.append(lname)
         # add geometry to layer
-        polyline_to_rhino_layer(
-            geom=polygon.rhino_polygon(), layer=layer, attr=polygon.attributes)
+        polygon_to_rhino_layer(
+            geom=polygon.rhino_polygon(), layer=lname, attr=polygon.attributes)
 
     return p_layers
 
 
-def polyline_to_rhino_layer(geom, layer, attr=None):
+def polygon_to_rhino_layer(polygon, layer, attr=None):
     """Add Polygon instance to Rhino document layer.
 
     Parameters
@@ -115,7 +152,7 @@ def polyline_to_rhino_layer(geom, layer, attr=None):
     -------
 
     """
-    obj = rs.AddPolyline(geom.points)
+    obj = rs.AddPolyline(polygon.points)
     rs.ObjectLayer(object_id=obj, layer=layer)
 
     if attr:
