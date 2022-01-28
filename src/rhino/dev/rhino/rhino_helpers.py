@@ -26,7 +26,6 @@ def add_parent_layer(lname, attr=None):
 
 def add_child_layer(lname, parent, attr=None):
     # Add layer if it does not exist yet
-    # TODO: add tag move polygon to correct layer
     if not (rs.IsLayer(lname) and rs.IsLayerParentOf(lname, parent)):
         lname = rs.AddLayer(name=lname, color=None,
                             visible=True, locked=False, parent=parent)
@@ -177,7 +176,6 @@ def set_document_user_text(data):
 
 def get_document_user_text():
     """Returns Rhino document user text as python dictionary"""
-    # remove empty spaces with split() to check for empty strings
     return {k: json.loads(rs.GetDocumentUserText(key=k)) for k in rs.GetDocumentUserText()}
 
 

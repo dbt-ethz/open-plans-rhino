@@ -96,7 +96,7 @@ class AccountInfo(forms.Dialog[bool]):
     # OK button click handler
     def on_login_button_click(self, sender, e):
         if self.textbox_email_login.Text == "" or self.passwordbox_pw_login.Text == "":
-            print("Please provide credentials")
+            raise Exception("Please provide credentials")
         else:
             self.Close(True)
 

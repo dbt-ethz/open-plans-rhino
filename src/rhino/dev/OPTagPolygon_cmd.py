@@ -109,11 +109,15 @@ def run_command():
     # if no tag exists and object is in correct layer, tag can be assigned
     user_input = request_polygon_tag()
     if user_input['tag']:
-        lname, lid = rhh.add_child_layer(user_input['tag'], parent=user_input['floor'])
-        rs.ObjectLayer(obj, layer=lname)
         pts_data = rhh.rhino_curve_to_data_points(obj)
         polygon = datamodels.OpenPlansPolygon.from_custom(
             data={'points': pts_data, 'tags': [user_input['tag']]})
+
+        lname, lid = rhh.add_child_layer(
+            lname='{} ({})'.format(
+                user_input['tag'], user_input['floor'].split('::')[2][:2]),
+            parent=user_input['floor'])
+        rs.ObjectLayer(obj, layer=lname)
 
         rhh.set_object_user_text(object_id=obj, data=polygon.attributes)
 

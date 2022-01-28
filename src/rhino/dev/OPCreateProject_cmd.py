@@ -118,8 +118,7 @@ class CreateProject(forms.Dialog[bool]):
     # OK button click handler
     def on_OK_button_click(self, sender, e):
         if self.m_textbox_name.Text == "":
-            print("Failed to create project: Name is required")
-            self.Close(False)
+            raise Exception("Failed to create project: Name is required")
         else:
             self.Close(True)
 
