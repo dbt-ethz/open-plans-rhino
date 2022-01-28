@@ -93,7 +93,6 @@ def request_polygon_tag():
     if (rc):
         return dialog.get_text()
 
-
 def request_polygon():
     # get a polyline
     obj = rs.GetObject("Select a polygon to tag")
@@ -108,7 +107,7 @@ def run_command():
 
     # if no tag exists and object is in correct layer, tag can be assigned
     user_input = request_polygon_tag()
-    if user_input['tag']:
+    if user_input:
         pts_data = rhh.rhino_curve_to_data_points(obj)
         polygon = datamodels.OpenPlansPolygon.from_custom(
             data={'points': pts_data, 'tags': [user_input['tag']]})
