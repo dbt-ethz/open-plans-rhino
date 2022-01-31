@@ -5,7 +5,7 @@ import uri
 
 
 def login(email, password):
-    url = uri.URI + '/auth/login'
+    url = uri.URI + 'auth/login'
     data = json.dumps({'email': email,
                        'password': password})
     req = urllib2.Request(url, data=data, headers={
