@@ -13,6 +13,10 @@ import Eto.Forms as forms
 import api
 import datamodels as models
 
+import cookielib
+import urllib2
+import re
+
 __commandname__ = "OPMyAccount"
 
 
@@ -56,7 +60,7 @@ class AccountInfo(forms.Dialog[bool]):
         # password
         label_pw_login = forms.Label(Text='Password:')
         self.passwordbox_pw_login = forms.PasswordBox()
-        # check for account existinf
+        # check for account existing
         checkbox_new = forms.CheckBox(Text='Create New Account')
         # login button
         self.LoginButton = forms.Button(Text='Sign in')

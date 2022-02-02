@@ -5,7 +5,7 @@ import uri
 
 
 def fetch_polygon_types():
-    url = uri.URI + '/polygon_type/all'
+    url = uri.URI + 'polygon_type/all'
     req = urllib2.Request(url)
 
     try:

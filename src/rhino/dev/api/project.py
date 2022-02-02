@@ -6,7 +6,7 @@ import uri
 
 
 def save_project(project):
-    url = uri.URI + '/project/save'
+    url = uri.URI + 'project/save'
     data = json.dumps(project)
     req = urllib2.Request(url)
     req.add_data(data)
@@ -18,10 +18,11 @@ def save_project(project):
         return retVal
     except HTTPError as e:
         print(e)
+        raise
 
 
 def fetch_project(project_id):
-    url = uri.URI + '/project/fetch/{}'.format(project_id)
+    url = uri.URI + 'project/fetch/{}'.format(project_id)
     req = urllib2.Request(url)
 
     try:
@@ -35,7 +36,7 @@ def fetch_project(project_id):
 
 def fetch_account_project(account_id, number, page=1):
     url = uri.URI + \
-        '/project/fetch/account/{}?number={}&page={}'.format(
+        'project/fetch/account/{}?number={}&page={}'.format(
             account_id, number, page)
     req = urllib2.Request(url)
 

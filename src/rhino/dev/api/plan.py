@@ -5,7 +5,7 @@ import uri
 
 
 def fetch_plan(plan_id):
-    url = uri.URI + '/plan/fetch/{}'.format(plan_id)
+    url = uri.URI + 'plan/fetch/{}'.format(plan_id)
     req = urllib2.Request(url)
 
     try:

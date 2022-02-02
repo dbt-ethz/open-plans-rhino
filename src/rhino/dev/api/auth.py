@@ -1,10 +1,15 @@
 import urllib2
 from urllib2 import HTTPError
+import cookielib
 import json
 import uri
 
 
 def login(email, password):
+    cj = cookielib.CookieJar()
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+    urllib2.install_opener(opener)
+
     url = uri.URI + 'auth/login'
     data = json.dumps({'email': email,
                        'password': password})
