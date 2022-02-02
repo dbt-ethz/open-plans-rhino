@@ -13,9 +13,6 @@ import Eto.Forms as forms
 import api
 import datamodels as models
 
-import cookielib
-import urllib2
-import re
 
 __commandname__ = "OPMyAccount"
 
