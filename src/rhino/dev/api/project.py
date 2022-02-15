@@ -9,8 +9,8 @@ import uri
 def save_project(project):
     url = uri.URI + 'project/save'
     data = json.dumps(project)
-    req = urllib2.Request(url)
-    req.add_data(data)
+    req = urllib2.Request(url, data=data, headers={
+                          'Content-Type': 'application/json'})
 
     try:
         response = urllib2.urlopen(req)

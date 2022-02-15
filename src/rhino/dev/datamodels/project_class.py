@@ -119,6 +119,10 @@ class OpenPlansProject:
     def __repr__(self):
         return "{}(project={})".format(self.__class__.__name__, self.project)
 
+    def upload_project(self):
+        dict = {k: v for k, v in self.project.iteritems() if v is not None}
+        print(dict)
+
 
 class OpenPlansPlan:
 
