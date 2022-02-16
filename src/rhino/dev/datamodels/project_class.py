@@ -14,8 +14,6 @@ import copy
 
 class OpenPlansProject:
 
-    #_PROJECT_MODEL = dict(project_fields)
-
     def __init__(self, data_fields=copy.deepcopy(project_fields)):
         self.__project = data_fields
 
@@ -83,12 +81,15 @@ class OpenPlansProject:
             self.__project['plans'].append(plan)
         return self
 
-    def get_plan_objs(self, plan_ids=None):
+    def plan_objs(self):
+        return [OpenPlansPlan.from_custom(data=plan) for plan in self.plans]
+
+    def get_plan_objs_from_ids(self, plan_ids=None):
         """Constructs OpenPlansPlan object instances from plan data.
 
         Parameters
         ----------
-        plan_ids : list
+        [Optional] plan_ids : list
             If ids of plans given, only selected plans will be returned.
 
         Returns
@@ -119,9 +120,50 @@ class OpenPlansProject:
     def __repr__(self):
         return "{}(project={})".format(self.__class__.__name__, self.project)
 
-    def upload_project(self):
-        dict = {k: v for k, v in self.project.iteritems() if v is not None}
-        print(dict)
+    def remove_empty_values(self, data=None):
+        """Remove empty values from dictionary, except for empty lists.
+
+        Parameters
+        ----------
+        [Optional] data : dict
+            if given, the data dictionary to remove empty values from, 
+            else it takes the project dictionary.
+
+        Returns
+        -------
+        cleaned_dict : dict
+            The cleaned dictionary without empty values.
+        """
+        data = self.project if not data else data
+        cleaned_dict = {}
+        for key, value in data.iteritems():
+            if type(value) is list:
+                nested_dicts = [self.remove_empty_values(data=x) for x in value if type(
+                    x) is dict and self.remove_empty_values(data=x)]
+
+                cleaned_dict[key] = nested_dicts if len(
+                    nested_dicts) > 0 else value if len(value) > 0 else []
+            elif value:
+                cleaned_dict[key] = value
+
+        return cleaned_dict
+
+    def upload_to_openplans(self):
+        """Upload the project dictionary to the Open Plans database
+        through a REST api request (post).
+
+        Returns
+        -------
+        : str
+            Project id if succesful, else error message
+        """
+        upload_data = self.remove_empty_values()
+        resp = api.save_project(upload_data)
+        if resp['succeeded']:
+            print('Project succesfully uploaded to Open Plans; Project(id={})'.format(
+                resp['project_id']))
+        else:
+            print(resp['error'])
 
 
 class OpenPlansPlan:
@@ -183,7 +225,7 @@ class OpenPlansPlan:
     def attributes(self):
         return {k: v for k, v in self.plan.iteritems() if k not in ['polygons']}
 
-    def plan_polygons(self):
+    def plan_polygon_objs(self):
         return [OpenPlansPolygon.from_data(data=poly)
                 for poly in self.plan['polygons']]
 
@@ -194,10 +236,26 @@ class OpenPlansPlan:
             self.plan['polygons'].append(polygon)
         return self
 
+    def remove_empty_values(self, data=None):
+
+        data = self.plan if not data else data
+
+        cleaned_dict = {}
+        for key, value in data.iteritems():
+            if type(value) is list:
+                nested_dicts = [self.remove_empty_values(data=x) for x in value if type(
+                    x) is dict and self.remove_empty_values(data=x)]
+
+                cleaned_dict[key] = nested_dicts if len(
+                    nested_dicts) > 0 else value if len(value) > 0 else []
+
+            elif value:
+                cleaned_dict[key] = value
+
+        return cleaned_dict
+
 
 class OpenPlansPolygon:
-
-    #_POLYGON_MODEL = dict(polygon_fields)
 
     def __init__(self, data_fields=copy.deepcopy(polygon_fields)):
         self.__polygon = data_fields
@@ -270,3 +328,6 @@ class OpenPlansPolygon:
 
     def rhino_polygon(self):
         return rhino.geometry.Polygon.from_data(data=self.points)
+
+    def remove_empty_values(self):
+        return {k: v for k, v in self.polygon.iteritems() if v}

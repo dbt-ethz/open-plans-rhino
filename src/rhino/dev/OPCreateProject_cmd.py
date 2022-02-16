@@ -100,8 +100,8 @@ class CreateProject(forms.Dialog[bool]):
         return {
             'name': self.m_textbox_name.Text,
             'architects': self.m_textbox_architect.Text.split(','),
-            'civil_engineer': self.m_textbox_ceng.Text,
-            'client': self.m_textbox_client.Text,
+            'civil_engineers': self.m_textbox_ceng.Text,
+            'clients': self.m_textbox_client.Text,
             'year_of_completion': self.m_numeric_yoc.Text,
             'source': self.m_textbox_source.Text,
             'description': self.m_richtextarea.Text

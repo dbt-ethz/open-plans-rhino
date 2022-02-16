@@ -123,7 +123,7 @@ def add_polygon_rhino_layers(plan):
         list of layer names from polygon layers
     """
     p_layers = []
-    for polygon in plan.plan_polygons():
+    for polygon in plan.plan_polygon_objs():
         lname, lid = add_child_layer(lname=' '.join(
             map(str, polygon.tags)), parent=rs.LayerName(plan.plan_id_string, fullpath=True))
         p_layers.append(lname)
