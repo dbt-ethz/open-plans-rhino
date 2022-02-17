@@ -2,12 +2,14 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 
-import datamodels
-
 import rhinoscriptsyntax as rs
 import Rhino
 import scriptcontext as sc
+import System.Windows.Forms.DialogResult
+import System.Drawing.Image
 import json
+
+import datamodels
 
 
 def add_parent_layer(lname, attr=None):
@@ -246,6 +248,43 @@ def get_rhino_doc_layer_obj(fullpath_lname):
     index = sc.doc.Layers.FindByFullPath(fullpath_lname, -1)
     if index >= 0:
         return sc.doc.Layers[index]
+
+
+def add_background_bitmap():
+    # Allow the user to select a bitmap file
+    fd = Rhino.UI.OpenFileDialog()
+    fd.Filter = "Image Files (*.bmp;*.png;*.jpg)|*.bmp;*.png;*.jpg"
+    if not fd.ShowDialog():
+        return Rhino.Commands.Result.Cancel
+
+    # Verify the file that was selected
+    image = None
+    try:
+        image = System.Drawing.Image.FromFile(fd.FileName)
+    except:
+        return Rhino.Commands.Result.Failure
+
+    # Allow the user to pick the bitmap origin
+    gp = Rhino.Input.Custom.GetPoint()
+    gp.SetCommandPrompt("Bitmap Origin")
+    gp.ConstrainToConstructionPlane(True)
+    gp.Get()
+    if gp.CommandResult()!=Rhino.Commands.Result.Success:
+        return gp.CommandResult()
+
+    # Get the view that the point was picked in.
+    # This will be the view that the bitmap appears in.
+    view = gp.View()
+    if view is None:
+        view = sc.doc.Views.ActiveView
+        if view is None: return Rhino.Commands.Result.Failure
+
+
+    plane = view.ActiveViewport.ConstructionPlane()
+    plane.Origin = gp.Point()
+    view.ActiveViewport.SetTraceImage(fd.FileName, plane, image.Width, image.Height, False, False)
+    view.Redraw()
+    return Rhino.Commands.Result.Success 
 
 
 def op_project_exists(func):

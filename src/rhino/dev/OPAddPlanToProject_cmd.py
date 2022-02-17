@@ -95,23 +95,25 @@ def request_new_plan():
 
 @rhh.op_project_exists
 def run_command():
-    plan, project = request_new_plan()
-    if plan:
-        # plan instance from user input
-        plan = datamodels.OpenPlansPlan.from_custom(data=plan)
+    ret = rhh.add_background_bitmap()
+    if ret == Rhino.Commands.Result.Success:
+        plan, project = request_new_plan()
+        if plan:
+            # plan instance from user input
+            plan = datamodels.OpenPlansPlan.from_custom(data=plan)
 
-        # plan layer
-        plan_lname, plan_lid = rhh.add_child_layer(lname=plan.plan_id_string,
-                                         parent=rs.LayerChildren(
-                                             "OpenPlans")[project],
-                                         attr=plan.attributes)
+            # plan layer
+            plan_lname, plan_lid = rhh.add_child_layer(lname=plan.plan_id_string,
+                                            parent=rs.LayerChildren(
+                                                "OpenPlans")[project],
+                                            attr=plan.attributes)
 
-        # TODO: Remove plan from document user text
-        # project instance from document user data
-        # project = datamodels.OpenPlansProject.from_custom(
-        #     data=rhh.get_document_user_text())
-        # # add plan and add to rhino
-        # rhh.project_to_rhino_layers(project.add_plan(plan))
+            # TODO: Remove plan from document user text
+            # project instance from document user data
+            # project = datamodels.OpenPlansProject.from_custom(
+            #     data=rhh.get_document_user_text())
+            # # add plan and add to rhino
+            # rhh.project_to_rhino_layers(project.add_plan(plan))
 
 
 if __name__ == "__main__":
