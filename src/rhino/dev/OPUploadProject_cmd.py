@@ -15,10 +15,10 @@ import json
 __commandname__ = "OPUploadProject"
 
 
-def run_command(is_interactive):
+def RunCommand(is_interactive):
     project = rhh.rhino_layers_to_project()
     project.upload_to_openplans()
 
 
 if __name__ == "__main__":
-    run_command(True)
+    RunCommand(True)

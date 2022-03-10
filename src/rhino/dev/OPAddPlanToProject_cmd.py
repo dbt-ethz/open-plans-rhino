@@ -94,8 +94,9 @@ def request_new_plan():
 
 
 @rhh.op_project_exists
-def run_command():
-    ret = rhh.add_background_bitmap()
+def RunCommand():
+    #ret = rhh.add_background_bitmap()
+    ret = Rhino.Commands.Result.Success
     if ret == Rhino.Commands.Result.Success:
         plan, project = request_new_plan()
         if plan:
@@ -117,4 +118,4 @@ def run_command():
 
 
 if __name__ == "__main__":
-    run_command(True)
+    RunCommand(True)

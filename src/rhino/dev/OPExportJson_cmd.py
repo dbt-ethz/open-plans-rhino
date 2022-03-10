@@ -26,7 +26,7 @@ def export_json(data, filepath):
         json.dump(data, o, indent=4)
 
 
-def run_command(is_interactive):
+def RunCommand(is_interactive):
     file_path = get_file_location()
     if file_path:
         project = rhh.rhino_layers_to_project()
@@ -35,4 +35,4 @@ def run_command(is_interactive):
 
 
 if __name__ == "__main__":
-    run_command(True)
+    RunCommand(True)

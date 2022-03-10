@@ -147,7 +147,7 @@ def create_new_project(project):
         return datamodels.OpenPlansProject.from_custom(data=project)
 
 
-def run_command(is_interactive):
+def RunCommand(is_interactive):
     new_project, file = request_new_project()
 
     if new_project:
@@ -161,4 +161,4 @@ def run_command(is_interactive):
 
 
 if __name__ == "__main__":
-    run_command(True)
+    RunCommand(True)

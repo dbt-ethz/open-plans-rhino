@@ -120,7 +120,7 @@ def request_account():
         return dialog.get_text()
 
 
-def run_command(is_interactive):
+def RunCommand(is_interactive):
     credentials = request_account()
     if credentials:
         user = models.User(email=credentials['email'])
@@ -128,4 +128,4 @@ def run_command(is_interactive):
 
 
 if __name__ == "__main__":
-    run_command(True)
+    RunCommand(True)

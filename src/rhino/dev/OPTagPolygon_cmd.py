@@ -101,7 +101,7 @@ def request_polygon():
 
 
 @ rhh.op_project_exists
-def run_command():
+def RunCommand():
     # get a polyline
     obj = request_polygon()
 
@@ -122,4 +122,4 @@ def run_command():
 
 
 if __name__ == "__main__":
-    run_command(True)
+    RunCommand(True)
