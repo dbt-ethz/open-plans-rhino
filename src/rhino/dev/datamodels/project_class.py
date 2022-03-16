@@ -5,6 +5,7 @@ from __future__ import division
 from datamodels.plan_model import plan_fields
 from datamodels.project_model import project_fields
 from datamodels.polygon_model import polygon_fields
+from services.image_upload import test_image_encoded, encode_image_b64
 import rhino.geometry
 import rhino.rhino_helpers
 import api
@@ -253,6 +254,16 @@ class OpenPlansPlan:
                 cleaned_dict[key] = value
 
         return cleaned_dict
+
+    def add_image_data(self, img_path=None, test=False):
+        if img_path:
+            img_b64 = encode_image_b64(img_path=img_path)
+        elif test:
+            img_b64 = test_image_encoded()
+        
+        if img_b64:
+            self.plan['image_data'] = img_b64
+            return self
 
 
 class OpenPlansPolygon:

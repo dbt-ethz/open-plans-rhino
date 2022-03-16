@@ -17,6 +17,11 @@ __commandname__ = "OPUploadProject"
 
 def RunCommand(is_interactive):
     project = rhh.rhino_layers_to_project()
+    plan_objs = project.plan_objs()
+    plan_objs_new = [plan.add_image_data(test=True) for plan in plan_objs]
+    plans = [p.plan for p in plan_objs_new]
+    project.modify_project(plans=plans)
+    #print(project.project)
     project.upload_to_openplans()
 
 
