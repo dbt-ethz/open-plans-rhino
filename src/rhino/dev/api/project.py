@@ -9,6 +9,7 @@ import uri
 def save_project(project):
     url = uri.URI + 'project/save'
     data = json.dumps(project)
+    print(data)
     req = urllib2.Request(url, data=data, headers={
                           'Content-Type': 'application/json'})
 

@@ -138,9 +138,10 @@ def request_new_project():
 
 
 def create_new_project(project):
-    project_id = api.get_data(dict=api.save_project(
-        project=datamodels.OpenPlansProject.from_custom(data=project).project), key='project_id')
+    # project_id = api.get_data(dict=api.save_project(
+    #     project=datamodels.OpenPlansProject.from_custom(data=project).project), key='project_id')
     # project_id = 557    # hardcoded for testing
+    project_id = None
     if project_id:
         return datamodels.OpenPlansProject.from_project_id(project_id)
     else:

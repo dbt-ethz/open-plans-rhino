@@ -226,6 +226,11 @@ class OpenPlansPlan:
     def attributes(self):
         return {k: v for k, v in self.plan.iteritems() if k not in ['polygons']}
 
+    def set_image_size(self, frame_size, mms_per_pixel=10):
+        self.__plan["width_mm"], self.__plan["height_mm"] = frame_size[0], frame_size[1]
+        self.__plan['mms_per_pixel'] = mms_per_pixel
+        return self
+
     def plan_polygon_objs(self):
         return [OpenPlansPolygon.from_data(data=poly)
                 for poly in self.plan['polygons']]
@@ -304,9 +309,9 @@ class OpenPlansPolygon:
         pass
 
     @classmethod
-    def from_rhino_object(cls, rhobj):
+    def from_rhino_object(cls, rhobj, frame_size=None):
         data = rhino.rhino_helpers.get_object_user_text(object_id=rhobj)
-        data['points'] = rhino.rhino_helpers.rhino_curve_to_data_points(rhobj)
+        data['points'] = rhino.rhino_helpers.rhino_curve_to_data_points(rhobj, frame_size)
         return cls.from_custom(data=data)
 
     @property
@@ -337,8 +342,14 @@ class OpenPlansPolygon:
     def attributes(self):
         return {k: v for k, v in self.polygon.iteritems() if k not in ['points']}
 
+    def add_polygon_tag(self, tag):
+        self.__polygon['tags'].append(tag)
+
     def rhino_polygon(self):
         return rhino.geometry.Polygon.from_data(data=self.points)
 
     def remove_empty_values(self):
         return {k: v for k, v in self.polygon.iteritems() if v}
+
+    def transform_rhino_to_image_coordinates(self, frame_size):
+        pass

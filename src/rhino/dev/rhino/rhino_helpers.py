@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from __future__ import division
 
 import rhinoscriptsyntax as rs
+import Rhino.Geometry as rg
 import Rhino
 import scriptcontext as sc
 import System.Windows.Forms.DialogResult
@@ -46,6 +47,12 @@ def add_child_layer(lname, parent, attr=None):
     return lname, layer_id
 
 
+def remove_empty_layer(lname):
+    if rs.IsLayer(lname):
+        if rs.IsLayerEmpty(lname):
+            rs.DeleteLayer(lname)
+
+
 def project_to_rhino_layers(project):
     """Add Project instance to Rhino document layers.
 
@@ -75,13 +82,14 @@ def project_to_rhino_layers(project):
         _polygon_layers = add_polygon_rhino_layers(plan)
 
 
-def rhino_layers_to_project():
+def rhino_layers_to_project(frame_size=None):
     """Read rhino objects (geometry and layers) from 
     rhino doc and construct 'OpenPlansProject' instance.
 
     Parameters
     ----------
-    None
+    frame_size: tuple
+        w, h of image frame
 
     Returns
     -------
@@ -96,14 +104,17 @@ def rhino_layers_to_project():
     for plan_layer in rs.LayerChildren(project_layer):
         plan = datamodels.OpenPlansPlan.from_custom(
             data=get_layer_user_text(lname=plan_layer))
+        if frame_size:
+            plan.set_image_size(frame_size)
 
         for polygon_layer in rs.LayerChildren(plan_layer):
             rh_objs = sc.doc.Objects.FindByLayer(
                 get_rhino_doc_layer_obj(polygon_layer))
 
             for obj in rh_objs:
+                # TODO: change frame_size to plan.height_mm
                 plan.add_polygon(
-                    datamodels.OpenPlansPolygon.from_rhino_object(rhobj=obj.Id))
+                    datamodels.OpenPlansPolygon.from_rhino_object(rhobj=obj.Id, frame_size=frame_size))
 
         project.add_plan(plan)
 
@@ -225,7 +236,7 @@ def get_layer_user_text(lname):
         print('Error get layer text: Layer not found')
 
 
-def rhino_curve_to_data_points(obj):
+def rhino_curve_to_data_points(obj, frame_size):
     """Set Rhino document user text.
 
     Parameters
@@ -240,14 +251,50 @@ def rhino_curve_to_data_points(obj):
     """
     if rs.IsCurve(obj):
         points = rs.CurvePoints(obj)
-    # TODO: Flip Y coordinates to match image coordinates
-    return [{'x': p.X, 'y': p.Y} for p in points]
+    # TODO: Flip Y coordinates to match image coordinate
+    if frame_size:
+        return [{'x': p.X, 'y': (p.Y - frame_size[1]) * -1} for p in points]
+    else:
+        return [{'x': p.X, 'y': p.Y} for p in points]
 
 
 def get_rhino_doc_layer_obj(fullpath_lname):
     index = sc.doc.Layers.FindByFullPath(fullpath_lname, -1)
     if index >= 0:
         return sc.doc.Layers[index]
+
+
+def snap_image(size, mms_per_pixel=10):
+    Rhino.RhinoApp.RunScript(
+        "_SetZoomExtentsBorder _ParallelView=1 _Enter", True)
+
+    x, y = size[0], size[1]
+    blc_pt = rg.Point3d(x, y, 0)
+    pts = [rg.Point3d(0, 0, 0), blc_pt]
+    bb = rg.BoundingBox(pts)
+    RhinoDocument = Rhino.RhinoDoc.ActiveDoc
+    view = RhinoDocument.Views.Find("Top", False)
+    vp = view.ActiveViewport
+    width, height = x / mms_per_pixel, y / mms_per_pixel
+    size = System.Drawing.Size(width, height)
+    vp.Size = size
+    view.Redraw()
+    vp.ZoomBoundingBox(bb)
+    capture = view.CaptureToBitmap(size, False, False, False)
+    return capture
+
+
+def set_frame():
+    rect = rs.GetRectangle(
+        mode=1, base_point=(0, 0, 0),
+        prompt1="Please draw a frame around your flooplan",
+        prompt2="Please draw a frame around your flooplan. This frame is used to take an image and defines the coordinate system"
+    )
+    if rect:
+        print(rect)
+        w = int(abs(rect[1].X - rect[0].X))
+        h = int(abs(rect[3].Y - rect[0].Y))
+        return (w, h)
 
 
 def add_background_bitmap():
@@ -269,7 +316,7 @@ def add_background_bitmap():
     gp.SetCommandPrompt("Bitmap Origin")
     gp.ConstrainToConstructionPlane(True)
     gp.Get()
-    if gp.CommandResult()!=Rhino.Commands.Result.Success:
+    if gp.CommandResult() != Rhino.Commands.Result.Success:
         return gp.CommandResult()
 
     # Get the view that the point was picked in.
@@ -277,14 +324,15 @@ def add_background_bitmap():
     view = gp.View()
     if view is None:
         view = sc.doc.Views.ActiveView
-        if view is None: return Rhino.Commands.Result.Failure
-
+        if view is None:
+            return Rhino.Commands.Result.Failure
 
     plane = view.ActiveViewport.ConstructionPlane()
     plane.Origin = gp.Point()
-    view.ActiveViewport.SetTraceImage(fd.FileName, plane, image.Width, image.Height, False, False)
+    view.ActiveViewport.SetTraceImage(
+        fd.FileName, plane, image.Width, image.Height, False, False)
     view.Redraw()
-    return Rhino.Commands.Result.Success 
+    return Rhino.Commands.Result.Success
 
 
 def op_project_exists(func):

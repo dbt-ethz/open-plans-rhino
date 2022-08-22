@@ -5,7 +5,7 @@ project_fields = {
     "civil_engineers": "",
     "architects": [],
     "source": "",
-    "year_of_completion": "",
+    "year_of_completion": None,
     "clients": "",
     "floors": None,
     "height": None,
