@@ -148,11 +148,42 @@ def create_new_project(project):
         return datamodels.OpenPlansProject.from_custom(data=project)
 
 
+def CommandLineOptions():
+    items = ("Options", "CreateNew", "LoadExisting")
+    results = rs.GetBoolean("Create OPEN PLANS project (press enter to continue)", items, (False))
+    if results:
+        if results[0]:
+            load_existing_project()
+            return True
+    else:
+        print('Cancel')
+        return True
+
+
+def fetch_project_by_id(id):
+    return datamodels.OpenPlansProject.from_project_id(id)
+
+
+def load_existing_project():
+    project_id = rs.GetInteger("Project id")
+
+    if project_id:
+        openplans_project = fetch_project_by_id(id=project_id)
+
+        # add project to rhino layers
+        rhh.project_to_rhino_layers(openplans_project)
+
+
 def RunCommand(is_interactive):
+    options = CommandLineOptions()
+    if options:
+        return Rhino.Commands.Result.Success
+
     new_project, file = request_new_project()
 
     if new_project:
         openplans_project = create_new_project(new_project)
+
         # add project to rhino layers
         rhh.project_to_rhino_layers(openplans_project)
 

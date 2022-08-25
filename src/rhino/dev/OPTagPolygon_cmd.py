@@ -34,7 +34,7 @@ class PolygonTagSelection(forms.Dialog[bool]):
             Text=self.active_project.project_id_string)
 
         # Floor levels dropdown
-        self.m_label_floor = forms.Label(Text='Floor')
+        self.m_label_floor = forms.Label(Text='Plan')
         # Create Dropdown List
         self.m_dropdown_floors = forms.DropDown()
         # set floors in layers as options in dropdown

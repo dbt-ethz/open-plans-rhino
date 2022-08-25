@@ -96,7 +96,7 @@ def RunCommand(is_interactive):
     project_file = request_json_file()
     data = json_to_dict(project_file)
     project = datamodels.OpenPlansProject.from_custom(data=data)
-    # project.upload_to_openplans()
+    project.upload_to_openplans()
 
 
 if __name__ == "__main__":

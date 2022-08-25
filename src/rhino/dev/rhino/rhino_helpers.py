@@ -53,7 +53,7 @@ def remove_empty_layer(lname):
             rs.DeleteLayer(lname)
 
 
-def project_to_rhino_layers(project):
+def project_to_rhino_layers(project, plan_ids=None):
     """Add Project instance to Rhino document layers.
 
     Parameters
@@ -73,7 +73,10 @@ def project_to_rhino_layers(project):
         lname=project.project_id_string, parent=add_parent_layer('OpenPlans')[0])
 
     # plan layers
-    plans = project.fetch_project_plans()
+    if plan_ids:
+        plans = project.fetch_project_plans(plan_ids=plan_ids)
+    else:
+        plans = project.fetch_project_plans()
     for plan in plans:
         _plan_lname, _plan_lid = add_child_layer(
             lname=plan.plan_id_string, parent=project_lname, attr=plan.attributes)
@@ -82,7 +85,7 @@ def project_to_rhino_layers(project):
         _polygon_layers = add_polygon_rhino_layers(plan)
 
 
-def rhino_layers_to_project(frame_size=None):
+def rhino_layers_to_project(frame_size=None, plan_layer_selection=None):
     """Read rhino objects (geometry and layers) from 
     rhino doc and construct 'OpenPlansProject' instance.
 
@@ -100,8 +103,11 @@ def rhino_layers_to_project(frame_size=None):
         data=get_document_user_text())
 
     project_layer = rs.LayerChildren("OpenPlans")[0]  # TODO: make more robust
+    plan_layers = rs.LayerChildren(project_layer)
+    if plan_layer_selection:
+        plan_layers = [plan for plan in rs.LayerChildren(project_layer) if plan in plan_layer_selection]
 
-    for plan_layer in rs.LayerChildren(project_layer):
+    for plan_layer in plan_layers:
         plan = datamodels.OpenPlansPlan.from_custom(
             data=get_layer_user_text(lname=plan_layer))
         if frame_size:
@@ -137,12 +143,12 @@ def add_polygon_rhino_layers(plan):
     """
     p_layers = []
     for polygon in plan.plan_polygon_objs():
-        lname, lid = add_child_layer(lname=' '.join(
-            map(str, polygon.tags)), parent=rs.LayerName(plan.plan_id_string, fullpath=True))
+        lname, lid = add_child_layer(lname='{} ({})'.format(', '.join(
+            map(str, polygon.tags)), plan.plan_id_string.split(' ')[0]), parent=rs.LayerName(plan.plan_id_string, fullpath=True))
         p_layers.append(lname)
         # add geometry to layer
         polygon_to_rhino_layer(
-            geom=polygon.rhino_polygon(), layer=lname, attr=polygon.attributes)
+            polygon=polygon.rhino_polygon(frame_height=plan.height_mm), layer=lname, attr=polygon.attributes)
 
     return p_layers
 
@@ -228,12 +234,27 @@ def set_layer_user_text(lname, data):
 
 def get_layer_user_text(lname):
     index = sc.doc.Layers.FindByFullPath(lname, -1)
+
     if index >= 0:
         layer = sc.doc.Layers[index]
         if layer:
             return {k: json.loads(layer.GetUserString(key=k)) for k in layer.GetUserStrings().AllKeys}
     else:
         print('Error get layer text: Layer not found')
+
+
+def get_active_project():
+    return datamodels.OpenPlansProject.from_custom(
+        data=get_document_user_text())
+
+
+def get_active_plan_layernames(fullpath=True):
+    project = get_active_project()
+    if fullpath:
+        return rs.LayerChildren(project.project_id_string)
+    else:
+        return [floor.split(
+            '::')[2] for floor in rs.LayerChildren(project.project_id_string)]
 
 
 def rhino_curve_to_data_points(obj, frame_size):
@@ -251,7 +272,6 @@ def rhino_curve_to_data_points(obj, frame_size):
     """
     if rs.IsCurve(obj):
         points = rs.CurvePoints(obj)
-    # TODO: Flip Y coordinates to match image coordinate
     if frame_size:
         return [{'x': p.X, 'y': (p.Y - frame_size[1]) * -1} for p in points]
     else:

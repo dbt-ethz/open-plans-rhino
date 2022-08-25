@@ -110,8 +110,11 @@ class OpenPlansProject:
             self.__project[key] = kwargs[key]
         return self
 
-    def fetch_project_plans(self):
-        return [OpenPlansPlan.from_plan_id(id=id) for id in self.plan_ids]
+    def fetch_project_plans(self, plan_ids=None):
+        if plan_ids:
+            return [OpenPlansPlan.from_plan_id(id=id) for id in plan_ids]
+        else:
+            return [OpenPlansPlan.from_plan_id(id=id) for id in self.plan_ids]
 
     @property
     def project_id_string(self):
@@ -158,7 +161,8 @@ class OpenPlansProject:
         : str
             Project id if succesful, else error message
         """
-        upload_data = self.remove_empty_values()
+        #upload_data = self.remove_empty_values()
+        upload_data = self.project
         resp = api.save_project(upload_data)
         if resp['succeeded']:
             print('Project succesfully uploaded to Open Plans; Project(id={})'.format(
@@ -219,12 +223,31 @@ class OpenPlansPlan:
         return self.plan['polygons']
 
     @property
+    def image_path(self):
+        return self.plan['image_path']
+
+    @property
+    def mms_per_pixel(self):
+        return self.plan['mms_per_pixel']
+
+    @property
+    def height_mm(self):
+        return self.plan['height_mm']
+
+    @property
+    def width_mm(self):
+        return self.plan['width_mm']
+
+    @property
     def plan_id_string(self):
         return "{} Level; ID: {}".format(str(self.floor).zfill(2), self.plan_id)
 
     @property
     def attributes(self):
         return {k: v for k, v in self.plan.iteritems() if k not in ['polygons']}
+
+    def get_project_id(self):
+        return api.get_data(dict=api.fetch_plan(plan_id=self.plan_id), key='plan')['project_id']
 
     def set_image_size(self, frame_size, mms_per_pixel=10):
         self.__plan["width_mm"], self.__plan["height_mm"] = frame_size[0], frame_size[1]
@@ -345,8 +368,8 @@ class OpenPlansPolygon:
     def add_polygon_tag(self, tag):
         self.__polygon['tags'].append(tag)
 
-    def rhino_polygon(self):
-        return rhino.geometry.Polygon.from_data(data=self.points)
+    def rhino_polygon(self, frame_height=0):
+        return rhino.geometry.Polygon.from_data(data=self.points, move_y=frame_height)
 
     def remove_empty_values(self):
         return {k: v for k, v in self.polygon.iteritems() if v}
