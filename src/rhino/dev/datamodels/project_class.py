@@ -32,12 +32,16 @@ class OpenPlansProject:
         :class:`OpenPlansProject`
             The constructed dataclass.
         """
+        if 'id' in data.keys():
+            data['project_id'] = data.pop('id')
         return cls(data_fields={k: v for k, v in data.iteritems() if k in project_fields})
 
     @classmethod
     def from_custom(cls, data=None, **kwargs):
         project_attr = copy.deepcopy(project_fields)
         if data:
+            if 'id' in data.keys():
+                data['project_id'] = data.pop('id')
             for key in data:
                 if data[key]:
                     project_attr[key] = data[key]
@@ -57,7 +61,13 @@ class OpenPlansProject:
 
     @property
     def plans(self):
-        return self.project['plans']
+        data = self.project['plans']
+        plans = []
+        for p in data:
+            if 'id' in p.keys():
+                p['plan_id'] = p.pop('id')
+            plans.append(p)
+        return plans
 
     @property
     def name(self):
@@ -65,11 +75,11 @@ class OpenPlansProject:
 
     @property
     def project_id(self):
-        return self.project['id']
+        return self.project['project_id']
 
     @property
     def plan_ids(self):
-        return [p['id'] for p in self.plans if p['id']]
+        return [p['plan_id'] for p in self.plans if p['plan_id']]
 
     @property
     def attributes(self):
@@ -99,7 +109,7 @@ class OpenPlansProject:
             List of the constructed class instances.
         """
         if plan_ids:
-            return [OpenPlansPlan.from_data(p) for p in self.plans if p['id'] in plan_ids]
+            return [OpenPlansPlan.from_data(p) for p in self.plans if p['plan_id'] in plan_ids]
         else:
             return [OpenPlansPlan.from_data(p) for p in self.plans]
 
@@ -149,6 +159,9 @@ class OpenPlansProject:
                     nested_dicts) > 0 else value if len(value) > 0 else []
             elif value:
                 cleaned_dict[key] = value
+            
+            elif key == 'image_path' or key == 'image_data':
+                cleaned_dict[key] = value
 
         return cleaned_dict
 
@@ -161,8 +174,8 @@ class OpenPlansProject:
         : str
             Project id if succesful, else error message
         """
-        #upload_data = self.remove_empty_values()
-        upload_data = self.project
+        upload_data = self.remove_empty_values()
+        #upload_data = self.project
         resp = api.save_project(upload_data)
         if resp['succeeded']:
             print('Project succesfully uploaded to Open Plans; Project(id={})'.format(
@@ -190,12 +203,16 @@ class OpenPlansPlan:
         :class:`OpenPlansPlan`
             The constructed dataclass.
         """
+        if 'id' in data.keys():
+            data['plan_id'] = data.pop('id')
         return cls(data_fields={k: v for k, v in data.iteritems() if k in plan_fields})
 
     @classmethod
     def from_custom(cls, data=None, **kwargs):
         plan_attr = copy.deepcopy(plan_fields)
         if data:
+            if 'id' in data.keys():
+                data['plan_id'] = data.pop('id')
             for key in data:
                 plan_attr[key] = data[key]
         for key in kwargs:
@@ -212,7 +229,7 @@ class OpenPlansPlan:
 
     @property
     def plan_id(self):
-        return self.plan['id']
+        return self.plan['plan_id']
 
     @property
     def floor(self):
@@ -220,7 +237,13 @@ class OpenPlansPlan:
 
     @property
     def polygons(self):
-        return self.plan['polygons']
+        data = self.plan['polygons']
+        polygons = []
+        for p in data:
+            if 'id' in p.keys():
+                p['polygon_id'] = p.pop('id')
+            polygons.append(p)
+        return polygons
 
     @property
     def image_path(self):
@@ -288,7 +311,7 @@ class OpenPlansPlan:
             img_b64 = encode_image_b64(img_path=img_path)
         elif test:
             img_b64 = test_image_encoded()
-        
+
         if img_b64:
             self.plan['image_data'] = img_b64
             return self
@@ -313,12 +336,16 @@ class OpenPlansPolygon:
         :class:`OpenPlansPolygon`
             The constructed dataclass.
         """
+        if 'id' in data.keys():
+            data['polygon_id'] = data.pop('id')
         return cls(data_fields={k: v for k, v in data.iteritems() if k in polygon_fields})
 
     @classmethod
     def from_custom(cls, data=None, **kwargs):
         polygon_attr = copy.deepcopy(polygon_fields)
         if data:
+            if 'id' in data.keys():
+                data['polygon_id'] = data.pop('id')
             for key in data:
                 if data[key]:
                     polygon_attr[key] = data[key]
@@ -334,7 +361,8 @@ class OpenPlansPolygon:
     @classmethod
     def from_rhino_object(cls, rhobj, frame_size=None):
         data = rhino.rhino_helpers.get_object_user_text(object_id=rhobj)
-        data['points'] = rhino.rhino_helpers.rhino_curve_to_data_points(rhobj, frame_size)
+        data['points'] = rhino.rhino_helpers.rhino_curve_to_data_points(
+            rhobj, frame_size)
         return cls.from_custom(data=data)
 
     @property
@@ -343,7 +371,7 @@ class OpenPlansPolygon:
 
     @property
     def polygon_id(self):
-        return self.polygon['id']
+        return self.polygon['polygon_id']
 
     @property
     def plan_id(self):

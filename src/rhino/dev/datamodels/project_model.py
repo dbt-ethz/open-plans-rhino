@@ -1,9 +1,9 @@
 project_fields = {
-    "id": None,
+    "project_id": None,
     "name": "",
     "description": "",
     "civil_engineers": "",
-    "architects": [],
+    "architects": "",
     "source": "",
     "year_of_completion": None,
     "clients": "",

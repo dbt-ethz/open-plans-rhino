@@ -195,7 +195,10 @@ def set_document_user_text(data):
 
 def get_document_user_text():
     """Returns Rhino document user text as python dictionary"""
-    return {k: json.loads(rs.GetDocumentUserText(key=k)) for k in rs.GetDocumentUserText()}
+    try:
+        return {k: json.loads(rs.GetDocumentUserText(key=k)) for k in rs.GetDocumentUserText()}
+    except:
+        print("Invalid characters in document user text. Please check strings are quoted with ''")
 
 
 def set_object_user_text(object_id, data):

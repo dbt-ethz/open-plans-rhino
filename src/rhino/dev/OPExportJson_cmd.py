@@ -64,7 +64,7 @@ def CommandLineOptions():
 
         get_rc = gp.Get()
         if gp.CommandResult() != Rhino.Commands.Result.Success:
-            return gp.CommandResult()
+            return None, None
         if get_rc == Rhino.Input.GetResult.Nothing:
             plan = plan_layers_full[listIndex]
             print("Export plan: ", plan_layers[listIndex])
@@ -74,11 +74,14 @@ def CommandLineOptions():
                 listIndex = gp.Option().CurrentListOptionIndex
             continue
         break
-    return Rhino.Commands.Result.Success
+    return None, None
 
 
 def RunCommand(is_interactive):
     export_plan_lname, set_frame_bool = CommandLineOptions()
+    if not export_plan_lname:
+        return 0
+
     if set_frame_bool:
         size = rhh.set_frame()
     else:
@@ -115,12 +118,14 @@ def RunCommand(is_interactive):
                 # update layer user text
                 new_plan = project.plan_objs()[0]
                 rhh.set_layer_user_text(export_plan_lname, new_plan.plan)
+                #TODO: Check plan id instead of id
             try:
                 export_json(data=project.project, filepath=json_file_path)
                 print("Succesful export json to: ", json_file_path)
             except:
                 print("Failed to export: ", json_file_path)
 
+    return Rhino.Commands.Result.Success
 
 if __name__ == "__main__":
     RunCommand(True)

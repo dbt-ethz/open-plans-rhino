@@ -30,10 +30,16 @@ class CreateProject(forms.Dialog[bool]):
         self.m_label_name = forms.Label(Text='Project Name')
         self.m_textbox_name = forms.TextBox(Text=None)
 
+        # create attributes Tags
+        self.m_label_tags = forms.Label(Text='Project Tags')
+        self.m_textbox_tags = forms.TextBox(Text=None)
+        self.m_textbox_tags.PlaceholderText = 'Tag1, Tag2'
+
         # create attributes architects
         self.m_label_architect = forms.Label(
-            Text='Architect(s) (separate architects with ",")')
+            Text='Architect(s)')
         self.m_textbox_architect = forms.TextBox()
+        self.m_textbox_architect.PlaceholderText = 'Architect1, Architect2'
 
         # create attributes civil engineer
         self.m_label_ceng = forms.Label(Text='Civil Engineer')
@@ -80,6 +86,7 @@ class CreateProject(forms.Dialog[bool]):
 
         layout.BeginVertical()
         layout.AddRow(self.m_label_name, self.m_textbox_name)
+        layout.AddRow(self.m_label_tags, self.m_textbox_tags)
         layout.AddRow(self.m_label_architect, self.m_textbox_architect)
         layout.AddRow(self.m_label_ceng, self.m_textbox_ceng)
         layout.AddRow(self.m_label_client, self.m_textbox_client)
@@ -99,7 +106,9 @@ class CreateProject(forms.Dialog[bool]):
     def get_text(self):
         return {
             'name': self.m_textbox_name.Text,
-            'architects': self.m_textbox_architect.Text.split(','),
+            'tags': self.m_textbox_tags.Text.split(','),
+            #'architects': self.m_textbox_architect.Text.split(','),
+            'architects': self.m_textbox_architect.Text,
             'civil_engineers': self.m_textbox_ceng.Text,
             'clients': self.m_textbox_client.Text,
             'year_of_completion': self.m_numeric_yoc.Text,

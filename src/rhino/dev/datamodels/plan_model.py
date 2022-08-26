@@ -1,5 +1,5 @@
 plan_fields = {
-    "id": None,
+    "plan_id": None,
     "image_path": "",
     "image_data": "",
     "mms_per_pixel": None,
