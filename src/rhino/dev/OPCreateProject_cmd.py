@@ -111,7 +111,7 @@ class CreateProject(forms.Dialog[bool]):
             'architects': self.m_textbox_architect.Text,
             'civil_engineers': self.m_textbox_ceng.Text,
             'clients': self.m_textbox_client.Text,
-            'year_of_completion': self.m_numeric_yoc.Text,
+            'year_of_completion': int(self.m_numeric_yoc.Text),
             'source': self.m_textbox_source.Text,
             'description': self.m_richtextarea.Text
         }
