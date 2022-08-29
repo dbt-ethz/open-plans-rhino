@@ -45,3 +45,20 @@ def logout():
         return retVal
     except HTTPError as e:
         print(e)
+
+
+def signup(name, email, password):
+    url = uri.URI + 'auth/signup'
+    data = json.dumps({ 'name': name,
+                        'email': email,
+                        'password': password})
+    req = urllib2.Request(url, data=data, headers={
+                          'Content-Type': 'application/json'})
+
+    try:
+        response = urllib2.urlopen(req)
+        json_string = response.read().decode('utf-8')
+        retVal = dict(json.loads(json_string))
+        return retVal
+    except HTTPError as e:
+        print(e)   
