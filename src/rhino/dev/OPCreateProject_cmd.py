@@ -117,7 +117,7 @@ class CreateProject(forms.Dialog[bool]):
     def get_text(self):
         return {
             'name': self.m_textbox_name.Text,
-            'tags': self.m_textbox_tags.Text.split(','),
+            'tags': self.m_textbox_tags.Text.replace(' ','').split(','),
             #'architects': self.m_textbox_architect.Text.split(','),
             'architects': self.m_textbox_architect.Text,
             'civil_engineers': self.m_textbox_ceng.Text,
