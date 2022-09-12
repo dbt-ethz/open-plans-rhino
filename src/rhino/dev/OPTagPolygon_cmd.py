@@ -1,6 +1,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
+from email import message
 
 import rhinoscriptsyntax as rs
 import Rhino
@@ -93,44 +94,44 @@ def request_polygon_tag():
     if (rc):
         return dialog.get_text()
 
+
 def request_polygon():
     # get a polyline
-    obj = rs.GetObject("Select a polygon to tag")
-    rs.SelectObject(obj, redraw=False)
-    return obj
+    objs = rs.GetObjects(message="Select polygon(s) to tag", filter=4)
+    n = rs.SelectObjects(objs)
+    if n > 1:
+        print(n, "polygons selected for tagging")
+    else:
+        print(n, "polygon selected for tagging")
+    return objs
 
 
 @ rhh.op_project_exists
 def RunCommand():
     # get a polyline
-    obj = request_polygon()
+    objs = request_polygon()
 
     # if no tag exists and object is in correct layer, tag can be assigned
     user_input = request_polygon_tag()
     if user_input:
-        
-        polygon = datamodels.OpenPlansPolygon.from_rhino_object(obj)
-        polygon.add_polygon_tag(user_input['tag'])
-        print(polygon.tags)
-        # pts_data = rhh.rhino_curve_to_data_points(obj)
-        # polygon = datamodels.OpenPlansPolygon.from_custom(
-        #     data={'points': pts_data, 'tags': [user_input['tag']]})
+        for obj in objs:
+            polygon = datamodels.OpenPlansPolygon.from_rhino_object(obj)
+            polygon.add_polygon_tag(user_input['tag'])
 
+            lname, lid = rhh.add_child_layer(
+                lname='{} ({})'.format(
+                    ', '.join(polygon.tags), user_input['floor'].split('::')[2][:2]),
+                parent=user_input['floor'])
+            rs.ObjectLayer(obj, layer=lname)
 
-        lname, lid = rhh.add_child_layer(
-            lname = '{} ({})'.format(
-                ', '.join(polygon.tags), user_input['floor'].split('::')[2][:2]),
-            parent=user_input['floor'])
-        rs.ObjectLayer(obj, layer=lname)
+            # check if layer already exists
+            # if empty, remove
+            if len(polygon.tags) > 1:
+                lname_old = '{} ({})'.format(
+                    ', '.join(polygon.tags[:-1]), user_input['floor'].split('::')[2][:2])
+                rhh.remove_empty_layer(lname=lname_old)
 
-        # check if layer already exists
-        # if empty, remove
-        if len(polygon.tags) > 1:
-            lname_old = '{} ({})'.format(
-                ', '.join(polygon.tags[:-1]), user_input['floor'].split('::')[2][:2])
-            rhh.remove_empty_layer(lname=lname_old)
-
-        rhh.set_object_user_text(object_id=obj, data=polygon.attributes)
+            rhh.set_object_user_text(object_id=obj, data=polygon.attributes)
 
 
 if __name__ == "__main__":
