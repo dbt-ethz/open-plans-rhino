@@ -64,6 +64,15 @@ class CreateProject(forms.Dialog[bool]):
         self.m_label_source = forms.Label(Text='Source information')
         self.m_textbox_source = forms.TextBox(Text=None)
 
+        # geolocation
+        self.m_label_lat = forms.Label(Text='Latitude')
+        self.m_textbox_lat = forms.TextBox(Text=None)
+        self.m_textbox_lat.PlaceholderText = '47.4088180795008'
+
+        self.m_label_long = forms.Label(Text='Longitude')
+        self.m_textbox_long = forms.TextBox(Text=None)
+        self.m_textbox_long.PlaceholderText = '8.505813237051635'
+
         # select file location
         self.m_label_file = forms.Label(Text='Save File Path')
         self.m_textbox_file = forms.TextBox(Text=None)
@@ -93,8 +102,10 @@ class CreateProject(forms.Dialog[bool]):
         layout.AddRow(self.m_label_source, self.m_textbox_source)
         layout.AddRow(self.m_label_yoc, self.m_numeric_yoc)
         layout.AddRow(self.m_label_richtext, self.m_richtextarea)
+        layout.AddRow(self.m_label_lat, self.m_textbox_lat)
+        layout.AddRow(self.m_label_long, self.m_textbox_long)
         layout.AddRow(self.m_label_file,
-                      self.m_textbox_file, self.BrowseButton)
+                    self.m_textbox_file, self.BrowseButton)
         layout.EndVertical()
 
         layout.AddSeparateRow(self.DefaultButton)
@@ -111,9 +122,11 @@ class CreateProject(forms.Dialog[bool]):
             'architects': self.m_textbox_architect.Text,
             'civil_engineers': self.m_textbox_ceng.Text,
             'clients': self.m_textbox_client.Text,
-            'year_of_completion': int(self.m_numeric_yoc.Text),
+            'year_of_completion': int(self.m_numeric_yoc.Text) if self.m_numeric_yoc.Text else None,
             'source': self.m_textbox_source.Text,
-            'description': self.m_richtextarea.Text
+            'description': self.m_richtextarea.Text,
+            'longitude': self.m_textbox_long.Text, 
+            'latitude': self.m_textbox_lat.Text
         }
 
     def get_file_location(self):

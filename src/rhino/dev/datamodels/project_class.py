@@ -34,6 +34,11 @@ class OpenPlansProject:
         """
         if 'id' in data.keys():
             data['project_id'] = data.pop('id')
+        
+        if 'geolocation' in data.keys():
+            data['latitude'] = data['geolocation']['latitude']
+            data['longitude'] = data['geolocation']['longitude']
+        
         return cls(data_fields={k: v for k, v in data.iteritems() if k in project_fields})
 
     @classmethod
@@ -42,6 +47,11 @@ class OpenPlansProject:
         if data:
             if 'id' in data.keys():
                 data['project_id'] = data.pop('id')
+            
+            if 'geolocation' in data.keys():
+                data['latitude'] = data['geolocation']['latitude']
+                data['longitude'] = data['geolocation']['longitude']
+            
             for key in data:
                 if data[key]:
                     project_attr[key] = data[key]
@@ -165,6 +175,13 @@ class OpenPlansProject:
 
         return cleaned_dict
 
+    def format_geolocation(self, data=None):
+        data = self.project if not data else data
+        lat = data.pop('latitude')
+        long = data.pop('longitude')
+        data['geolocation'] = {'longitude': long, 'latitude': lat}
+        return data
+
     def upload_to_openplans(self):
         """Upload the project dictionary to the Open Plans database
         through a REST api request (post).
@@ -175,6 +192,7 @@ class OpenPlansProject:
             Project id if succesful, else error message
         """
         upload_data = self.remove_empty_values()
+        upload_data = self.format_geolocation(data=upload_data)
         #upload_data = self.project
         resp = api.save_project(upload_data)
         if resp['succeeded']:

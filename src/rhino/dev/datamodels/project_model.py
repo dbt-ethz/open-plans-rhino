@@ -11,5 +11,7 @@ project_fields = {
     "height": None,
     "floor_area": None,
     "plans": [],
-    "tags": []
+    "tags": [],
+    "latitude": None,
+    "longitude": None
 }

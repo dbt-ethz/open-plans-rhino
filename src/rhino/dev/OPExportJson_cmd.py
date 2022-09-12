@@ -112,6 +112,7 @@ def RunCommand(is_interactive):
         if json_file_path:
             project = rhh.rhino_layers_to_project(
                 frame_size=size, plan_layer_selection=export_plan_lname)
+            project.format_geolocation()
             # add image data to plan
             if new_image:
                 project = add_image_to_plan(project, image_file_path)
