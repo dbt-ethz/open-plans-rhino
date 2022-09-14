@@ -10,3 +10,5 @@ Go to [releases](https://github.com/dbt-ethz/open-plans-rhino/releases) and down
 %APPDATA%\McNeel\Rhinoceros\7.0\Plug-ins\PythonPlugIns\
 ```
 From the unpacked zip file, drop the folder OPENPLANS (with the crazy string of numbers!) in this Rhino folder without changing the name!
+
+Rhino should be closed when “installing” new plugins, otherwise it will need to be restarted before it recognizes any new commands.
