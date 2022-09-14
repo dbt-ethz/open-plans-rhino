@@ -47,7 +47,7 @@ class PolygonTagSelection(forms.Dialog[bool]):
         # Create Combobox
         self.m_label = forms.Label(Text='Tag:')
         self.m_combobox = forms.ComboBox()
-        self.m_combobox.DataStore = ['building', 'wall']
+        self.m_combobox.DataStore = ['building-outline']
 
         # Create the default button
         self.DefaultButton = forms.Button(Text='OK')
