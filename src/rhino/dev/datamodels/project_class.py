@@ -49,8 +49,8 @@ class OpenPlansProject:
                 data['project_id'] = data.pop('id')
             
             if 'geolocation' in data.keys():
-                data['latitude'] = data['geolocation']['latitude']
-                data['longitude'] = data['geolocation']['longitude']
+                data['latitude'] = data['geolocation']['latitude'] if data['geolocation'] is not None else None
+                data['longitude'] = data['geolocation']['longitude'] if data['geolocation'] is not None else None
             
             for key in data:
                 if data[key]:
@@ -192,7 +192,6 @@ class OpenPlansProject:
             Project id if succesful, else error message
         """
         upload_data = self.remove_empty_values()
-        upload_data = self.format_geolocation(data=upload_data)
         #upload_data = self.project
         resp = api.save_project(upload_data)
         if resp['succeeded']:
