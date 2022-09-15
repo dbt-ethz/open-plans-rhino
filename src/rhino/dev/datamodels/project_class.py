@@ -34,10 +34,12 @@ class OpenPlansProject:
         """
         if 'id' in data.keys():
             data['project_id'] = data.pop('id')
+
+        print(data)
         
         if 'geolocation' in data.keys():
-            data['latitude'] = data['geolocation']['latitude']
-            data['longitude'] = data['geolocation']['longitude']
+            data['latitude'] = data['geolocation']['latitude'] if data['geolocation'] is not None else None
+            data['longitude'] = data['geolocation']['longitude'] if data['geolocation'] is not None else None
         
         return cls(data_fields={k: v for k, v in data.iteritems() if k in project_fields})
 
