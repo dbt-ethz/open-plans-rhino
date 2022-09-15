@@ -34,8 +34,6 @@ class OpenPlansProject:
         """
         if 'id' in data.keys():
             data['project_id'] = data.pop('id')
-
-        print(data)
         
         if 'geolocation' in data.keys():
             data['latitude'] = data['geolocation']['latitude'] if data['geolocation'] is not None else None
