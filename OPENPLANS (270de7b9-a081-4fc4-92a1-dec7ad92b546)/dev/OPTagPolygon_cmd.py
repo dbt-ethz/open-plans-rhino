@@ -15,7 +15,7 @@ import rhino.rhino_helpers as rhh
 import datamodels
 
 
-__commandname__ = "OPTagPlanPolygon"
+__commandname__ = "OPTagPolygon"
 
 
 class PolygonTagSelection(forms.Dialog[bool]):

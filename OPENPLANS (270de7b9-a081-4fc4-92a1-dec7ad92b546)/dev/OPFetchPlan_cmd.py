@@ -16,7 +16,7 @@ import datamodels
 import urllib2
 
 
-__commandname__ = "OPFetchProject"
+__commandname__ = "OPFetchPlan"
 
 
 def fetch_plan_by_id(id):
